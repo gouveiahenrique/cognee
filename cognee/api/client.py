@@ -39,6 +39,7 @@ from cognee.api.v1.improve.routers import get_improve_router
 from cognee.api.v1.integrations.routers import get_integrations_router
 from cognee.api.v1.llm.routers import get_llm_router
 from cognee.api.v1.memify.routers import get_memify_router
+from cognee.api.v1.memory_coverage.routers import get_memory_coverage_router
 from cognee.api.v1.ontologies.routers.get_ontology_router import get_ontology_router
 from cognee.api.v1.permissions.routers import get_permissions_router
 from cognee.api.v1.proposals.routers import get_proposals_router
@@ -142,6 +143,12 @@ async def lifespan(app: FastAPI):
     rehashed = await rehash_plaintext_api_keys()
     if rehashed:
         logger.info("Hashed %d API key(s) stored before HASH_API_KEY was enabled", rehashed)
+
+    from cognee.modules.memory_coverage import fail_interrupted_coverage_runs
+
+    interrupted = await fail_interrupted_coverage_runs()
+    if interrupted:
+        logger.info("Marked %d interrupted memory coverage run(s) as errored", interrupted)
     from cognee.modules.cognify.recovery import pipeline_recovery_service
     from cognee.modules.users.authentication.get_auth_secret import resolve_auth_secrets
 
@@ -406,6 +413,10 @@ app.include_router(
 )
 
 app.include_router(get_datasets_router(), prefix="/api/v1/datasets", tags=["datasets"])
+
+app.include_router(
+    get_memory_coverage_router(), prefix="/api/v1/datasets", tags=["memory-coverage"]
+)
 
 app.include_router(get_ontology_router(), prefix="/api/v1/ontologies", tags=["ontologies"])
 

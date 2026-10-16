@@ -106,6 +106,14 @@ function ChartIcon({ active }: { active: boolean }) {
   );
 }
 
+function TargetIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" />
+    </svg>
+  );
+}
+
 // -- Navigation data --
 
 // Routes that require the tenant pod — dimmed/locked while it provisions.
@@ -150,6 +158,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { text: "Activity", link: "/activity", icon: ActivityIcon },
       { text: "Analytics", link: "/analytics", icon: ChartIcon },
+      { text: "Memory Coverage", link: "/memory-gap-analysis", icon: TargetIcon },
     ],
   },
   {
