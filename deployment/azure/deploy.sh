@@ -224,6 +224,19 @@ if ! az containerapp show -n "$APP" -g "$RG" -o none 2>/dev/null; then
     --cpu 2 --memory 4Gi --min-replicas 1 --max-replicas 1 \
     --secrets "${SECRETS[@]}" --env-vars "${ENVS[@]}" -o none
 else
+  # An app first created from a public image (IMAGE=...) has no registry login,
+  # so switching it to the ACR image fails with UNAUTHORIZED. Give its identity
+  # AcrPull and point the app at the registry before the image update.
+  if [ -z "${IMAGE:-}" ] && [ -z "$(az containerapp show -n "$APP" -g "$RG" \
+    --query "properties.configuration.registries[?server=='$ACR_SERVER'] | [0].server" -o tsv)" ]; then
+    az containerapp identity assign -n "$APP" -g "$RG" --system-assigned -o none
+    APP_PRINCIPAL=$(az containerapp show -n "$APP" -g "$RG" --query identity.principalId -o tsv)
+    az role assignment create --assignee-object-id "$APP_PRINCIPAL" \
+      --assignee-principal-type ServicePrincipal --role AcrPull \
+      --scope "$(az acr show -n "$ACR" -g "$RG" --query id -o tsv)" -o none
+    az containerapp registry set -n "$APP" -g "$RG" --server "$ACR_SERVER" \
+      --identity system -o none
+  fi
   az containerapp secret set -n "$APP" -g "$RG" --secrets "${SECRETS[@]}" -o none
   az containerapp update -n "$APP" -g "$RG" --image "$APP_IMAGE" \
     --set-env-vars "${ENVS[@]}" -o none
