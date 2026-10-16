@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/modules/users/useCurrentUser";
 import { useUser } from "@/modules/users/UserContext";
 import { displayName } from "@/modules/users/profileName";
-import getLocalUser from "@/modules/users/getLocalUser";
-import CogneeUser from "@/modules/users/CogneeUser";
 import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
 import Image from "next/image";
@@ -80,18 +78,12 @@ function PlusIcon() {
 }
 
 export default function TopBar() {
-  const [localUser, setLocalUser] = useState<CogneeUser>();
   const cloud = isCloudEnvironment();
-  const { data: cloudUser } = useCurrentUser(cloud);
-  const user = cloud ? cloudUser : localUser;
+  const { data: user } = useCurrentUser();
   const { userMe } = useUser();
   const pathname = usePathname();
   const { workspace, workspaces, setWorkspace } = useFilter();
   const { requestCreateWorkspace, availableTenants, wakeState, tenant } = useTenant();
-
-  useEffect(() => {
-    if (!cloud) getLocalUser().then((u) => { if (u) setLocalUser(u); });
-  }, [cloud]);
 
   // Derive page label
   const basePath = "/" + (pathname.split("/").filter(Boolean)[0] || "");
@@ -224,6 +216,7 @@ export default function TopBar() {
           // everyone else in the workspace already saw the new one.
           userName={cloud ? displayName(userMe?.profile ?? null, user?.name) : user?.name || ""}
           userEmail={user?.email || ""}
+          membersHref={cloud ? null : "/members"}
           logoutHref={cloud ? "/api/signout" : "/api/local-signout"}
         />
       </div>

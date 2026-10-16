@@ -14,6 +14,17 @@ function PersonIcon() {
   );
 }
 
+function TeamIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
 function LogoutIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -28,10 +39,11 @@ interface ProfileMenuProps {
   userName: string;
   userEmail: string;
   profileHref?: string;
+  membersHref?: string | null;
   logoutHref?: string;
 }
 
-export default function ProfileMenu({ userName, userEmail, profileHref = "/settings", logoutHref = "/api/signout" }: ProfileMenuProps) {
+export default function ProfileMenu({ userName, userEmail, profileHref = "/settings", membersHref = null, logoutHref = "/api/signout" }: ProfileMenuProps) {
   const { value: isOpen, toggle, setFalse: close } = useBoolean(false);
   const closeCallback = useCallback(() => close(), [close]);
   const containerRef = useOutsideClick<HTMLDivElement>(closeCallback, isOpen);
@@ -93,6 +105,18 @@ export default function ProfileMenu({ userName, userEmail, profileHref = "/setti
             <PersonIcon />
             Profile
           </Link>
+
+          {membersHref && (
+            <Link
+              href={membersHref}
+              onClick={close}
+              className="flex items-center gap-[10px] rounded-[6px] px-3 py-[10px] hover:bg-white/[0.07] focus-visible:bg-white/[0.07] focus-visible:outline-2 focus-visible:outline-[#BC9BFF]"
+              style={{ fontSize: 13, color: "#EDECEA", textDecoration: "none" }}
+            >
+              <TeamIcon />
+              Members
+            </Link>
+          )}
 
           <div style={{ height: 1, background: "rgba(255,255,255,0.08)", margin: "2px -6px" }} />
 

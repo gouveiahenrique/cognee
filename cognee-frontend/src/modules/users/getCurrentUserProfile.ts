@@ -1,5 +1,3 @@
-"use server";
-
 import type CogneeUser from "./CogneeUser";
 import getLocalUser from "./getLocalUser";
 

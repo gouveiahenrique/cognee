@@ -89,6 +89,22 @@ function KeyIcon({ active }: { active: boolean }) {
   );
 }
 
+function ActivityIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  );
+}
+
+function ChartIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
 // -- Navigation data --
 
 // Routes that require the tenant pod — dimmed/locked while it provisions.
@@ -123,6 +139,13 @@ const NAV_SECTIONS: NavSection[] = [
       },
       { text: "Graph", link: "/knowledge-graph", icon: GraphIcon },
       { text: "Search", link: "/search", icon: SearchIcon },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { text: "Activity", link: "/activity", icon: ActivityIcon },
+      { text: "Analytics", link: "/analytics", icon: ChartIcon },
     ],
   },
   {

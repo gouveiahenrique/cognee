@@ -15,6 +15,7 @@ import {
   type ProfileNames,
 } from "@/modules/users/profileName";
 import NameFields, { namesAreSendable, type NameDraft } from "@/ui/elements/NameFields";
+import isCloudEnvironment from "@/utils/isCloudEnvironment";
 import styles from "../SettingsPage.module.css";
 
 function toDraft(names: ProfileNames | null): NameDraft {
@@ -194,7 +195,9 @@ export default function ProfileWidget() {
       <Text size="sm" style={{ color: "rgba(237,236,234,0.35)" }} mt="1rem">
         {unavailable
           ? "Profile editing is not available right now. Your email is managed by your sign-in provider."
-          : "Your email is managed by your sign-in provider."}
+          : isCloudEnvironment()
+            ? "Your email is managed by your sign-in provider."
+            : "Your sign-in email. An administrator can change it from Members."}
       </Text>
     </Stack>
   );

@@ -85,7 +85,9 @@ export default function ApiKeysPage() {
   }, [tenantReady]);
 
   // Use tenant ID from context (set during provisioning), not from /users/me
-  const tenantId = tenant?.tenant_id || null;
+  // Local mode has no tenant routing: the API scopes every key to its user, so
+  // there is no X-Tenant-Id to show (the "local" placeholder is not a real id).
+  const tenantId = isCloud ? tenant?.tenant_id || null : null;
   const isDev = serviceUrl?.includes("dev-aws") || serviceUrl?.includes("dev.cloud");
   const apiDocsUrl = serviceUrl ? `${serviceUrl}/docs` : null;
 
@@ -259,7 +261,7 @@ export default function ApiKeysPage() {
               ) : isCloud ? (
                 <span style={{ flex: 1 }}><SkeletonBar width={180} height={12} /></span>
               ) : (
-                <span style={{ fontSize: 13, color: "rgba(237,236,234,0.35)", fontFamily: 'ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", monospace', fontStyle: "italic" }}>Not assigned (local mode)</span>
+                <span style={{ fontSize: 13, color: "rgba(237,236,234,0.35)", fontFamily: 'ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", monospace', fontStyle: "italic" }}>Not needed — keys are scoped to your user</span>
               )}
             </div>
           </div>
@@ -289,6 +291,7 @@ export default function ApiKeysPage() {
 
       {/* Documentation links */}
       <div style={{ display: "flex", gap: 12 }}>
+        {isCloud && (
         <a
           href={isDev ? "https://api.dev-aws.cognee.ai/docs" : "https://api.aws.cognee.ai/docs"}
           target="_blank"
@@ -304,6 +307,7 @@ export default function ApiKeysPage() {
           </div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(237,236,234,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto", flexShrink: 0 }}><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
         </a>
+        )}
         {apiDocsUrl && (
           <a
             href={apiDocsUrl}
@@ -391,9 +395,11 @@ export default function ApiKeysPage() {
               ) : (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span className="cs-mask" data-cs-mask="true" style={{ fontSize: 13, color: "rgba(237,236,234,0.7)", fontFamily: 'ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", monospace' }}>{k.label || k.key}</span>
-                  <button onClick={() => handleCopy(k.id, k.key)} className="cursor-pointer" style={{ background: "none", border: "none", padding: 2, display: "flex" }} title="Copy key">
-                    {copiedId === k.id ? <CheckIcon /> : <CopyIcon />}
-                  </button>
+                  {k.key !== "************" && (
+                    <button onClick={() => handleCopy(k.id, k.key)} className="cursor-pointer" style={{ background: "none", border: "none", padding: 2, display: "flex" }} title="Copy key">
+                      {copiedId === k.id ? <CheckIcon /> : <CopyIcon />}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
