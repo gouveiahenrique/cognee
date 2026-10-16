@@ -46,6 +46,9 @@ import { MemoryFlowDiagram } from "./partials/redesign/MemoryFlowDiagram";
 import type { FlowSource, FlowAgent } from "./partials/redesign/MemoryFlowDiagram";
 import { CostPanel } from "./partials/redesign/CostPanel";
 import { PerformancePanel } from "./partials/redesign/PerformancePanel";
+import isCloudEnvironment from "@/utils/isCloudEnvironment";
+import { averageScore } from "@/modules/memoryCoverage/coverage";
+import { useDatasetCoverage } from "@/modules/memoryCoverage/useDatasetCoverage";
 import { ActivityPanel } from "./partials/redesign/ActivityPanel";
 import type { DashRange } from "./partials/redesign/RangeToggle";
 import { FONT, T } from "./partials/redesign/mono";
@@ -141,6 +144,10 @@ export default function OverviewPage(): React.ReactElement {
   // paths, so it needs nothing from this. One query key per tenant also means
   // flipping the toggle no longer refetches at all.
   const { runs, sessions, connections, loading, error: telemetryError, sessionsFailed, updatedAt, runsTruncated, sessionsTruncated } = useDashboardTelemetry();
+  const cloud = isCloudEnvironment();
+  // Self-hosted coverage comes from this deployment's own analysis endpoint;
+  // useCoverageRuns above only runs in the cloud.
+  const { data: coverageByDataset = {} } = useDatasetCoverage(cloud ? [] : datasets.map((d) => d.id));
   const { data: hourlyCosts = null } = useTenantHourlyCosts(tenant?.tenant_id ?? null, range);
   // A plugin registers with the pod at launch, seconds before a session or
   // memory write exists — reading connections too is what lets a card and
@@ -302,7 +309,13 @@ export default function OverviewPage(): React.ReactElement {
   // panel shows (see the useCoverageRuns call above), so the rows and the
   // headline below describe the same datasets in the same order. No second
   // slice of `datasets` and no id lookup to keep in sync with it.
-  const coverage = deriveCoverageView(coverageBrains);
+  const coverage = cloud
+    ? deriveCoverageView(coverageBrains)
+    : {
+        topics: datasets.map((d) => ({ id: d.id, name: d.name, pct: coverageByDataset[d.id]?.score ?? null })),
+        recallPct: averageScore(Object.values(coverageByDataset)),
+        unavailable: false,
+      };
 
   const greetingName = currentUser?.name?.trim() || (currentUser?.email ? currentUser.email.split("@")[0] : "");
 
@@ -435,7 +448,7 @@ export default function OverviewPage(): React.ReactElement {
             onViewDataset={(datasetId) => router.push(`/memory-gap-analysis?brain=${encodeURIComponent(datasetId)}`)}
             topics={coverage.topics}
             onUpload={() => uploadInputRef.current?.click()}
-            onViewAnalysis={() => router.push("/memory-gap-analysis")}
+            onViewAnalysis={(datasetId) => router.push(datasetId ? `/memory-gap-analysis?dataset=${datasetId}` : "/memory-gap-analysis")}
           />
         </div>
 

@@ -25,6 +25,7 @@ jest.mock("@/app/(app)/memory-gap-analysis/hooks/useCoverageRuns", () => ({
 }));
 
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: jest.fn() }) }));
+jest.mock("@/modules/memoryCoverage/useDatasetCoverage", () => ({ useDatasetCoverage: () => ({ data: {} }) }));
 jest.mock("@mantine/notifications", () => ({ notifications: { show: jest.fn() } }));
 jest.mock("@/modules/analytics", () => ({ trackEvent: jest.fn() }));
 jest.mock("@/ui/elements/PodUnreachableCard", () => ({
