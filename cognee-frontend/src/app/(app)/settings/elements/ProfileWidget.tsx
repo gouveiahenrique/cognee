@@ -3,7 +3,7 @@
 import { useCurrentUser } from "@/modules/users/useCurrentUser";
 import { Avatar, Divider, Flex, Stack, Text, TextInput } from "@mantine/core";
 import Image from "next/image";
-import { tokens } from "@/ui/theme/tokens";
+import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
 export default function ProfileWidget() {
   const { data: user } = useCurrentUser();
@@ -70,7 +70,9 @@ export default function ProfileWidget() {
         />
       </Stack>
       <Text size="sm" style={{ color: "rgba(237,236,234,0.35)" }} mt="1rem">
-        Profile information is managed by your authentication provider.
+        {isCloudEnvironment()
+          ? "Profile information is managed by your authentication provider."
+          : "Your sign-in email. An administrator can change it from Members."}
       </Text>
     </Stack>
   );

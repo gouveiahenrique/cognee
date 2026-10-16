@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/modules/users/useCurrentUser";
-import getLocalUser from "@/modules/users/getLocalUser";
-import CogneeUser from "@/modules/users/CogneeUser";
 import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
 import Image from "next/image";
@@ -75,17 +73,11 @@ function PlusIcon() {
 }
 
 export default function TopBar() {
-  const [localUser, setLocalUser] = useState<CogneeUser>();
   const cloud = isCloudEnvironment();
-  const { data: cloudUser } = useCurrentUser(cloud);
-  const user = cloud ? cloudUser : localUser;
+  const { data: user } = useCurrentUser();
   const pathname = usePathname();
   const { workspace, workspaces, setWorkspace } = useFilter();
   const { requestCreateWorkspace, availableTenants } = useTenant();
-
-  useEffect(() => {
-    if (!cloud) getLocalUser().then((u) => { if (u) setLocalUser(u); });
-  }, [cloud]);
 
   // Derive page label
   const basePath = "/" + (pathname.split("/").filter(Boolean)[0] || "");
@@ -168,6 +160,7 @@ export default function TopBar() {
         <ProfileMenu
           userName={user?.name || ""}
           userEmail={user?.email || ""}
+          membersHref={cloud ? null : "/members"}
           logoutHref={cloud ? "/api/signout" : "/api/local-signout"}
         />
       </div>

@@ -1,16 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import type { SessionRow } from "@/modules/sessions/getSessions";
+import { estimateCostUsd, tokensAvoided } from "@/modules/sessions/getSessions";
 import type { TenantHourlyCosts } from "@/modules/billing/getTenantHourlyCosts";
 import type { PipelineRun } from "@/ui/elements/AgentActivityTerminal";
 import { AsciiFrame } from "./AsciiFrame";
-import { FONT, T } from "./mono";
-import type { DashRange } from "./RangeToggle";
-
-/** Open-source stub — the spend/savings chart is priced off the tenant's real
- *  billing data and is a Cognee Cloud feature. Renders a text-only notice
- *  instead of syncing the real chart. */
+import { FONT, MONO_FONT, T } from "./mono";
+import { RangeToggle, type DashRange } from "./RangeToggle";
 
 interface CostPanelProps {
   sessions: SessionRow[];
@@ -22,25 +19,64 @@ interface CostPanelProps {
   onViewBreakdown?: () => void;
 }
 
-export function CostPanel(_props: CostPanelProps): React.ReactElement {
+const DAY_MS = 24 * 60 * 60 * 1000;
+const RANGE_DAYS: Record<string, number> = { "24h": 1, "7d": 7, "30d": 30 };
+
+/** Self-hosted cost view: there is no billing balance, so spend is estimated
+ *  from the token counts the API records on each run, bucketed per day. */
+export function CostPanel({ runs, range, onRangeChange, onViewBreakdown }: CostPanelProps): React.ReactElement {
+  const { buckets, totalTokens, totalUsd } = useMemo(() => {
+    const days = RANGE_DAYS[range] ?? 7;
+    const now = Date.now();
+    const start = now - days * DAY_MS;
+    const bucketCount = days === 1 ? 24 : days;
+    const bucketMs = (now - start) / bucketCount;
+    const values = new Array(bucketCount).fill(0);
+    let tokens = 0;
+    for (const r of runs) {
+      const at = Date.parse(r.started_at ?? r.created_at ?? "");
+      const t = (r.tokens_in ?? 0) + (r.tokens_out ?? 0);
+      if (!Number.isFinite(at) || at < start || t === 0) continue;
+      values[Math.min(bucketCount - 1, Math.floor((at - start) / bucketMs))] += estimateCostUsd(t, 0);
+      tokens += t;
+    }
+    return { buckets: values, totalTokens: tokens, totalUsd: estimateCostUsd(tokens, 0) };
+  }, [runs, range]);
+  const max = Math.max(...buckets, 0.0001);
+
   return (
-    <AsciiFrame label="Cost Savings" minHeight={260}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, textAlign: "center", padding: 20 }}>
-        <span style={{ ...FONT, fontSize: 14, fontWeight: 500, color: T.text }}>
-          Cost Savings is a Cognee Cloud feature
-        </span>
-        <span style={{ ...FONT, fontSize: 13, color: T.muted, maxWidth: 320 }}>
-          Build your own dashboard from the API, or use the hosted one in Cognee Cloud.
-        </span>
-        <a
-          href="https://www.cognee.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ ...FONT, marginTop: 4, background: T.lavender, color: "#000000", borderRadius: 8, padding: "8px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none" }}
-        >
-          Open Cognee Cloud
-        </a>
+    <AsciiFrame label="Cost" meta={<RangeToggle value={range} onChange={onRangeChange} />} minHeight={260}>
+      <div style={{ display: "flex", gap: 24, alignItems: "baseline", flexWrap: "wrap" }}>
+        <div>
+          <div style={{ ...MONO_FONT, fontSize: 26, color: T.text }}>${totalUsd.toFixed(2)}</div>
+          <div style={{ ...FONT, fontSize: 12, color: T.muted }}>estimated LLM spend</div>
+        </div>
+        <div>
+          <div style={{ ...MONO_FONT, fontSize: 26, color: T.text }}>{(totalTokens / 1000).toFixed(1)}K</div>
+          <div style={{ ...FONT, fontSize: 12, color: T.muted }}>tokens used</div>
+        </div>
+        <div>
+          <div style={{ ...MONO_FONT, fontSize: 26, color: T.green }}>{(tokensAvoided(totalTokens) / 1000).toFixed(1)}K</div>
+          <div style={{ ...FONT, fontSize: 12, color: T.muted }}>tokens saved · estimated</div>
+        </div>
       </div>
+      <div aria-label="Spend per period" style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 90, marginTop: 18 }}>
+        {buckets.map((v, i) => (
+          <div
+            key={i}
+            title={`$${v.toFixed(4)}`}
+            style={{ flex: 1, height: `${Math.max(2, (v / max) * 100)}%`, background: v > 0 ? T.lavender : T.chrome }}
+          />
+        ))}
+      </div>
+      {onViewBreakdown && (
+        <button
+          onClick={onViewBreakdown}
+          style={{ ...FONT, alignSelf: "flex-start", marginTop: 10, background: "none", border: "none", padding: 0, color: T.lavender, fontSize: 12.5, cursor: "pointer" }}
+        >
+          View breakdown →
+        </button>
+      )}
     </AsciiFrame>
   );
 }

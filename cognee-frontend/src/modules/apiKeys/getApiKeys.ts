@@ -1,6 +1,4 @@
-/**
- * Open-source stub — API keys are managed via the local backend directly.
- */
+import localFetch from "@/modules/instances/localFetch";
 
 export interface ApiKey {
   id: string;
@@ -10,5 +8,6 @@ export interface ApiKey {
 }
 
 export default async function getApiKeys(_instance?: unknown): Promise<ApiKey[]> {
-  return [];
+  const response = await localFetch("/v1/auth/api-keys");
+  return response.json();
 }
