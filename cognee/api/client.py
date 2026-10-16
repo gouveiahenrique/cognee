@@ -58,6 +58,7 @@ from cognee.api.v1.users.routers import (
     get_register_router,
     get_reset_password_router,
     get_user_id_by_email_router,
+    get_users_admin_router,
     get_users_router,
     get_verify_router,
     get_visualize_router,
@@ -133,6 +134,14 @@ async def lifespan(app: FastAPI):
         await get_default_user()
         await set_default_user_password_if_unset()
     report_default_user_login_posture()
+
+    from cognee.modules.users.api_key.rehash_plaintext_api_keys import (
+        rehash_plaintext_api_keys,
+    )
+
+    rehashed = await rehash_plaintext_api_keys()
+    if rehashed:
+        logger.info("Hashed %d API key(s) stored before HASH_API_KEY was enabled", rehashed)
     from cognee.modules.cognify.recovery import pipeline_recovery_service
     from cognee.modules.users.authentication.get_auth_secret import resolve_auth_secrets
 
@@ -359,11 +368,14 @@ async def exception_handler(request: Request, exc: CogneeApiError) -> JSONRespon
 
 app.include_router(get_auth_router(), prefix="/api/v1/auth", tags=["auth"])
 
-app.include_router(
-    get_register_router(),
-    prefix="/api/v1/auth",
-    tags=["auth"],
-)
+# Public self-service sign-up. Disable it on a shared deployment so only an
+# administrator can create accounts (POST /api/v1/users/admin).
+if os.getenv("ALLOW_PUBLIC_REGISTRATION", "true").lower() == "true":
+    app.include_router(
+        get_register_router(),
+        prefix="/api/v1/auth",
+        tags=["auth"],
+    )
 
 app.include_router(
     get_reset_password_router(),
@@ -423,6 +435,13 @@ app.include_router(get_responses_router(), prefix="/api/v1/responses", tags=["re
 app.include_router(get_llm_router(), prefix="/api/v1/llm", tags=["llm"])
 
 app.include_router(get_sync_router(), prefix="/api/v1/sync", tags=["sync"])
+
+# Registered before get_users_router so /users/admin is not taken for /users/{id}.
+app.include_router(
+    get_users_admin_router(),
+    prefix="/api/v1/users",
+    tags=["users"],
+)
 
 app.include_router(
     get_users_router(),
