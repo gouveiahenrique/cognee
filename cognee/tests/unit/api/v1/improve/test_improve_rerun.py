@@ -22,9 +22,18 @@ session_lock = importlib.import_module("cognee.infrastructure.locks.session_lock
 def _clean_registry():
     session_lock._improving_sessions.clear()
     session_lock._rerun_requested.clear()
+    session_lock._session_handoffs.clear()
     yield
     session_lock._improving_sessions.clear()
     session_lock._rerun_requested.clear()
+    session_lock._session_handoffs.clear()
+
+
+async def _drain_background():
+    """Wait for follow-up improves started from handoffs (they may start more)."""
+    from cognee.infrastructure.background_tasks import wait_for_background_tasks
+
+    await wait_for_background_tasks()
 
 
 async def _start_holder(harness, calls, *, session_ids):
@@ -92,18 +101,43 @@ async def test_dataset_only_collision_makes_no_rerun_request_and_no_extra_pass(h
 
 
 @pytest.mark.asyncio
-async def test_session_loser_against_a_dataset_only_holder_gets_no_promise(harness):
-    """The holder owns no session key, so there is nobody to ask; the loser is told so."""
+async def test_session_loser_against_a_dataset_only_holder_is_handed_off(harness):
+    """Only the dataset key was held: the holder improves the loser's sessions after it releases."""
     calls = []
     holder, gate = await _start_holder(harness, calls, session_ids=[])
 
     loser = await harness.improve(session_ids=["chat_1"])
 
     assert loser.lock_held
-    assert loser.rerun_requested is False
+    assert loser.rerun_requested is True
 
     gate.set()
     await holder.wait()
+    # No extra pass in the holder: the handed-off session gets its own run.
+    assert holder.rerun_passes == []
+    await asyncio.wait_for(_drain_background(), timeout=5)
+    assert calls == ["slow", "after", "slow", "after"]
+    assert session_lock._session_handoffs == {}
+    keys = session_lock.improve_lock_keys(["chat_1"], harness.dataset.id, harness.user.id)
+    assert await session_lock.try_acquire_improve_lock_many(keys)
+
+
+@pytest.mark.asyncio
+async def test_session_loser_against_another_session_holder_is_handed_off(harness):
+    """Two chats on one dataset: the second chat's improve is no longer dropped."""
+    calls = []
+    holder, gate = await _start_holder(harness, calls, session_ids=["chat_1"])
+
+    loser = await harness.improve(session_ids=["chat_2"])
+
+    assert loser.lock_held
+    assert loser.rerun_requested is True
+
+    gate.set()
+    await holder.wait()
+    await asyncio.wait_for(_drain_background(), timeout=5)
+    # The holder's pass, then the follow-up run for chat_2.
+    assert calls == ["slow", "after", "slow", "after"]
     assert holder.rerun_passes == []
 
 
