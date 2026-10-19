@@ -6,6 +6,7 @@ import { useCogniInstance, useTenant } from "@/modules/tenant/TenantProvider";
 import { useFilter } from "@/ui/layout/FilterContext";
 import UpgradeBanner from "@/ui/elements/UpgradeBanner";
 import recallKnowledge from "@/modules/datasets/recallKnowledge";
+import improveSession from "@/modules/sessions/improveSession";
 import getSearchHistory, { type SearchHistoryEntry } from "@/modules/searchHistory/getSearchHistory";
 import { listSessions, getSessionDetail, SEARCH_SESSION_PREFIX, type SessionRow } from "@/modules/sessions/getSessions";
 import { TrackPageView, trackEvent } from "@/modules/analytics";
@@ -272,6 +273,10 @@ export default function SearchPage() {
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Session with turns not yet bridged into the graph, and the dataset they
+  // were asked against. Recall records turns but never runs improve, so the
+  // page asks for one when the conversation ends (see flushPendingImprove).
+  const pendingImproveRef = useRef<{ sessionId: string; datasetId: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Merged conversations: local (this visit), persisted sessions (deduped by
@@ -346,7 +351,26 @@ export default function SearchPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  // Bridge the finished conversation's turns into the graph. Called when the
+  // user leaves a conversation: switching, starting a new one, or leaving the page.
+  function flushPendingImprove() {
+    const pending = pendingImproveRef.current;
+    pendingImproveRef.current = null;
+    if (pending && cogniInstance) improveSession(cogniInstance, pending.sessionId, pending.datasetId);
+  }
+
+  // Leaving the page (route change or closing the tab) also ends the conversation.
+  useEffect(() => {
+    window.addEventListener("pagehide", flushPendingImprove);
+    return () => {
+      window.removeEventListener("pagehide", flushPendingImprove);
+      flushPendingImprove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cogniInstance]);
+
   function newConversation() {
+    flushPendingImprove();
     const id = `${SESSION_PREFIX}${Date.now()}`;
     const convo: Conversation = { id, title: "New conversation", messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     setSessionConvos((prev) => [convo, ...prev]);
@@ -356,6 +380,7 @@ export default function SearchPage() {
   }
 
   function switchConversation(id: string) {
+    if (id !== pendingImproveRef.current?.sessionId) flushPendingImprove();
     setActiveConvoId(id);
     setInput("");
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -412,6 +437,16 @@ export default function SearchPage() {
         datasetIds: searchDatasetIds,
       });
       const resultData = (Array.isArray(data) ? data : []) as SearchResultItem[];
+      // Improve bridges one dataset; a turn in another session or against
+      // another dataset ends the previous batch first.
+      const datasetId = searchDatasetIds[0];
+      if (datasetId) {
+        const pending = pendingImproveRef.current;
+        if (pending && (pending.sessionId !== finalConvoId || pending.datasetId !== datasetId)) {
+          flushPendingImprove();
+        }
+        pendingImproveRef.current = { sessionId: finalConvoId, datasetId };
+      }
       const content = normalizeResults(resultData);
       const datasetLabel = resultData[0]?.dataset_name || selectedDataset?.name;
 
