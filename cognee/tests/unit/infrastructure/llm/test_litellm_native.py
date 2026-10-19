@@ -818,3 +818,33 @@ async def test_native_validation_error_routes_to_json_fallback(_clean_demotions)
     # fallback — NOT a tenacity re-send of the native request.
     assert mock_acompletion.call_count == 2
     assert mock_acompletion.call_args_list[1].kwargs["response_format"] == {"type": "json_object"}
+
+
+@pytest.mark.asyncio
+async def test_discriminated_union_sends_strict_anyof_schema(_clean_demotions):
+    """Discriminated unions go out strict, with oneOf rewritten to anyOf (strict rejects oneOf)."""
+    from cognee.infrastructure.session.feedback_models import SessionTurnAnalysis
+
+    adapter = _schema_adapter()
+    valid = json.dumps(
+        {
+            "candidate_context_updates": [
+                {"section": "preferences", "content": "Answer in German.", "confidence": 0.9}
+            ]
+        }
+    )
+    mock_acompletion = AsyncMock(return_value=_make_mock_response(valid))
+    with patch("litellm.acompletion", mock_acompletion):
+        result = await adapter.acreate_structured_output(
+            text_input="From now on answer in German",
+            system_prompt="Analyze the turn.",
+            response_model=SessionTurnAnalysis,
+        )
+
+    assert result.candidate_context_updates[0].section == "preferences"
+    assert mock_acompletion.call_count == 1
+    response_format = mock_acompletion.call_args.kwargs["response_format"]
+    assert response_format["json_schema"]["strict"] is True
+    schema_text = json.dumps(response_format["json_schema"]["schema"])
+    assert "oneOf" not in schema_text and "discriminator" not in schema_text
+    assert "anyOf" in schema_text

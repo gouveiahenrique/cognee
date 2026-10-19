@@ -196,6 +196,9 @@ ENVS=(
   # and close public sign-up: admins add users from the UI's Members page.
   "HASH_API_KEY=true" "API_KEY_HASH_SALT=secretref:api-key-hash-salt"
   "ALLOW_PUBLIC_REGISTRATION=${ALLOW_PUBLIC_REGISTRATION:-false}"
+  # Embed triplets at cognify so improve()'s triplet_enrichment stage runs;
+  # without it a remember() with no session_id has no improve stage to run.
+  "TRIPLET_EMBEDDING=${TRIPLET_EMBEDDING:-true}"
 )
 # Non-secret LLM/embedding settings copied from the .env when present.
 for k in LLM_PROVIDER LLM_MODEL LLM_ENDPOINT LLM_API_VERSION EMBEDDING_PROVIDER \

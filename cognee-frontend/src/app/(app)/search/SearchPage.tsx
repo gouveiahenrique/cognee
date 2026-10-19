@@ -21,6 +21,7 @@ import { normalizeResults, type SearchResultItem } from "@/modules/searchHistory
 import { readHistoryCache, writeHistoryCache } from "@/modules/searchHistory/historyCache";
 import { readCodeConversations, writeCodeConversations } from "@/modules/searchHistory/codeConversations";
 import { listSearchSessions, getSessionDetail, SEARCH_SESSION_PREFIX } from "@/modules/sessions/getSessions";
+import improveSession from "@/modules/sessions/improveSession";
 import { TrackPageView, trackEvent } from "@/modules/analytics";
 import BrainSelector from "@/ui/elements/BrainSelector";
 import getPodUserId from "@/modules/users/getPodUserId";
@@ -114,6 +115,10 @@ export default function SearchPage() {
   const [historyFailed, setHistoryFailed] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Session with turns not yet bridged into the graph, and the dataset they
+  // were asked against. Recall records turns but never runs improve, so the
+  // page asks for one when the conversation ends (see flushPendingImprove).
+  const pendingImproveRef = useRef<{ sessionId: string; datasetId: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Code conversations restored from this browser: the pod records only Text
@@ -295,16 +300,36 @@ export default function SearchPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  // Bridge the finished conversation's turns into the graph. Called when the
+  // user leaves a conversation: switching, starting a new one, or leaving the page.
+  function flushPendingImprove() {
+    const pending = pendingImproveRef.current;
+    pendingImproveRef.current = null;
+    if (pending && cogniInstance) improveSession(cogniInstance, pending.sessionId, pending.datasetId);
+  }
+
+  // Leaving the page (route change or closing the tab) also ends the conversation.
+  useEffect(() => {
+    window.addEventListener("pagehide", flushPendingImprove);
+    return () => {
+      window.removeEventListener("pagehide", flushPendingImprove);
+      flushPendingImprove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cogniInstance]);
+
   // Deselects rather than listing an empty "New conversation": the store now
   // outlives the page, so a placeholder row would follow the user around the
   // app until it was used. The session is created by the first question.
   function newConversation() {
+    flushPendingImprove();
     update((state) => (state.activeId === null ? state : { ...state, activeId: null }));
     setInput("");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
   function switchConversation(id: string) {
+    if (id !== pendingImproveRef.current?.sessionId) flushPendingImprove();
     update((state) => ({ ...state, activeId: id }));
     setInput("");
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -366,6 +391,16 @@ export default function SearchPage() {
         },
       );
       const resultData = (Array.isArray(data) ? data : []) as SearchResultItem[];
+      // Improve bridges one dataset; a turn in another session or against
+      // another dataset ends the previous batch first.
+      const datasetId = searchDatasetIds[0];
+      if (datasetId) {
+        const pending = pendingImproveRef.current;
+        if (pending && (pending.sessionId !== convoId || pending.datasetId !== datasetId)) {
+          flushPendingImprove();
+        }
+        pendingImproveRef.current = { sessionId: convoId, datasetId };
+      }
       const content = normalizeResults(resultData);
       const datasetLabel = resultData[0]?.dataset_name || selectedDataset?.name;
       patchAnswer((m) => ({ ...m, content, dataset: datasetLabel, loading: false, stage: undefined }));

@@ -108,6 +108,53 @@ def _nonstrict_response_format(response_model: type[BaseModel]) -> dict:
     }
 
 
+def _union_safe_schema(node: Any) -> bool:
+    """Rewrite ``oneOf`` to ``anyOf`` and drop ``discriminator`` in place.
+
+    Returns whether anything was rewritten. Pydantic emits ``oneOf`` plus a
+    ``discriminator`` for discriminated unions; strict mode (OpenAI, Azure)
+    rejects both but accepts ``anyOf``. Each variant pins its tag with a
+    ``const``/``enum``, so ``anyOf`` matches exactly one variant anyway.
+    """
+    changed = False
+    if isinstance(node, dict):
+        if node.pop("discriminator", None) is not None:
+            changed = True
+        if "oneOf" in node:
+            node["anyOf"] = node.pop("oneOf")
+            changed = True
+        for value in node.values():
+            changed = _union_safe_schema(value) or changed
+    elif isinstance(node, list):
+        for value in node:
+            changed = _union_safe_schema(value) or changed
+    return changed
+
+
+def _strict_response_format(response_model: type[BaseModel]) -> type[BaseModel] | dict:
+    """Strict ``response_format`` for ``response_model``.
+
+    Models without discriminated unions travel as the Pydantic class, which
+    litellm converts with OpenAI's strict-schema helper. Models with one get the
+    same strict schema with ``oneOf`` rewritten to ``anyOf`` — otherwise every
+    strict request for them is a guaranteed 400, and the non-strict demotion
+    that follows loses schema enforcement.
+    """
+    try:
+        from openai.lib._pydantic import to_strict_json_schema
+
+        schema = to_strict_json_schema(response_model)
+    except Exception:
+        logger.debug("Strict schema build failed; passing the model class", exc_info=True)
+        return response_model
+    if not _union_safe_schema(schema):
+        return response_model
+    return {
+        "type": "json_schema",
+        "json_schema": {"name": response_model.__name__, "schema": schema, "strict": True},
+    }
+
+
 def _attach_raw_response(instance: BaseModel, response) -> BaseModel:
     """Attach the raw litellm response as ``_raw_response``, like the legacy framework does.
 
@@ -302,7 +349,9 @@ class NativeLiteLLMAdapter:
                     {"role": "user", "content": text_input},
                 ],
                 response_format=(
-                    response_model if strict else _nonstrict_response_format(response_model)
+                    _strict_response_format(response_model)
+                    if strict
+                    else _nonstrict_response_format(response_model)
                 ),
                 api_key=api_key,
                 api_base=endpoint,
