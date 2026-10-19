@@ -62,6 +62,11 @@ def _estimate_tokens(text: str) -> int:
 # against the official pricing pages September 2026.
 _PRICING_PER_M_TOKENS = {
     # OpenAI — https://developers.openai.com/api/docs/pricing
+    # gpt-6.1-sol needs its own key: "gpt-6-sol" is not a prefix of it.
+    "gpt-6.1-sol": (2.00, 10.00),
+    "gpt-6-astra": (10.00, 50.00),
+    "gpt-6-sol": (2.00, 10.00),
+    "gpt-6-luna": (0.10, 0.50),
     "gpt-5.6-astra": (10.00, 50.00),
     "gpt-5.6-sol": (4.00, 20.00),
     "gpt-5.6-terra": (2.00, 12.00),
@@ -94,6 +99,7 @@ _PRICING_PER_M_TOKENS = {
     "claude-opus-4": (15.00, 75.00),  # Opus 4.0 / 4.1
     "claude-sonnet-5": (3.00, 15.00),  # $2/$10 introductory through 2026-08-31
     "claude-sonnet-4": (3.00, 15.00),  # Sonnet 4.0 / 4.5 / 4.6
+    "claude-haiku-5-5": (0.10, 0.50),
     "claude-haiku-4-5": (1.00, 5.00),
     "claude-3-5-sonnet": (3.00, 15.00),
     "claude-3-5-haiku": (0.80, 4.00),
