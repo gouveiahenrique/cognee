@@ -3,8 +3,10 @@
 // the backend's per-call concurrent processing was the binding constraint
 // (CLO-283). Uploads are now split into bounded batches (see batchFiles.ts), so
 // the per-request load no longer scales with the selection, and the cap is only
-// about how much a person can reasonably queue at once.
-export const MAX_FILES_PER_UPLOAD = 200;
+// about how much a person can reasonably queue at once. Raised 200 -> 1000 for
+// the self-hosted deployment, whose Postgres was sized up to absorb the larger
+// cognify backlog one selection now queues.
+export const MAX_FILES_PER_UPLOAD = 1000;
 
 // Files per multipart request. Small enough that one batch completes well
 // inside the per-request timeout even on a slow connection, large enough that
