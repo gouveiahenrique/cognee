@@ -3,6 +3,8 @@
 import localFetch from "@/modules/instances/localFetch";
 
 export type GoogleProvider = "google_drive" | "gmail";
+/** Every provider the self-hosted Integrations page connects through the SDK. */
+export type SdkProvider = GoogleProvider | "github" | "linear";
 
 export interface GoogleConnection {
   connected: boolean;
@@ -37,13 +39,13 @@ export interface GoogleResources {
   selected: string[] | null;
 }
 
-async function request<T>(provider: GoogleProvider, path: string, options?: RequestInit): Promise<T> {
+async function request<T>(provider: SdkProvider, path: string, options?: RequestInit): Promise<T> {
   const response = await localFetch(`/v1/integrations/${provider}/${path}`, options);
   return response.json();
 }
 
 export const googleApi = {
-  connection: async (provider: GoogleProvider): Promise<GoogleConnection> => {
+  connection: async (provider: SdkProvider): Promise<GoogleConnection> => {
     const response = await request<GoogleConnectionResponse>(provider, "connection");
     return {
       connected: response.connected,
@@ -55,20 +57,20 @@ export const googleApi = {
       sync_counts: response.syncCounts,
     };
   },
-  authorize: async (provider: GoogleProvider) => {
+  authorize: async (provider: SdkProvider) => {
     const response = await request<{ authorizeUrl: string }>(provider, "authorize", { method: "POST" });
     return { authorize_url: response.authorizeUrl };
   },
-  resources: (provider: GoogleProvider) => request<GoogleResources>(provider, "resources"),
-  select: (provider: GoogleProvider, resourceIds: string[] | null) =>
+  resources: (provider: SdkProvider) => request<GoogleResources>(provider, "resources"),
+  select: (provider: SdkProvider,resourceIds: string[] | null) =>
     request<{ selected: string[] | null }>(provider, "resources", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ resource_ids: resourceIds }),
     }),
-  sync: (provider: GoogleProvider) =>
+  sync: (provider: SdkProvider) =>
     request<{ accepted: boolean }>(provider, "sync", { method: "POST" }),
-  disconnect: (provider: GoogleProvider, deleteData: boolean) =>
+  disconnect: (provider: SdkProvider,deleteData: boolean) =>
     request<{ disconnected: boolean }>(provider, `connection?delete_data=${deleteData}`, {
       method: "DELETE",
     }),
@@ -78,10 +80,24 @@ export function googleError(error: unknown): string {
   return error instanceof Error ? error.message : "The Google integration request failed.";
 }
 
-export function googleAuthorizeUrl(raw: string): string {
+// The popup is navigated to whatever the server returns, so only each
+// provider's own HTTPS authorization origin is accepted.
+const AUTHORIZE_ORIGINS: Record<SdkProvider, { origin: string; label: string }> = {
+  google_drive: { origin: "https://accounts.google.com", label: "Google" },
+  gmail: { origin: "https://accounts.google.com", label: "Google" },
+  github: { origin: "https://github.com", label: "GitHub" },
+  linear: { origin: "https://linear.app", label: "Linear" },
+};
+
+export function authorizeUrlFor(provider: SdkProvider, raw: string): string {
   const url = new URL(raw);
-  if (url.origin !== "https://accounts.google.com") {
-    throw new Error("The server returned an unexpected Google authorization URL.");
+  const expected = AUTHORIZE_ORIGINS[provider];
+  if (url.origin !== expected.origin) {
+    throw new Error(`The server returned an unexpected ${expected.label} authorization URL.`);
   }
   return url.href;
+}
+
+export function googleAuthorizeUrl(raw: string): string {
+  return authorizeUrlFor("google_drive", raw);
 }
