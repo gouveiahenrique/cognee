@@ -66,6 +66,11 @@ fi
 if ! grep -q '^API_KEY_HASH_SALT=' "$CREDS_FILE"; then
   echo "API_KEY_HASH_SALT=$(openssl rand -hex 32)" >>"$CREDS_FILE"
 fi
+# Encrypts stored integration tokens (GitHub, Linear, Google). Generated once and
+# kept: changing it makes every stored connection undecryptable.
+if ! grep -q '^INTEGRATION_CREDENTIALS_KEY=' "$CREDS_FILE"; then
+  echo "INTEGRATION_CREDENTIALS_KEY=$(openssl rand -base64 32)" >>"$CREDS_FILE"
+fi
 # shellcheck disable=SC1090
 . "$CREDS_FILE"
 
@@ -167,6 +172,7 @@ SECRETS=(
   "reset-secret=$FASTAPI_USERS_RESET_PASSWORD_TOKEN_SECRET"
   "verify-secret=$FASTAPI_USERS_VERIFICATION_TOKEN_SECRET"
   "api-key-hash-salt=$API_KEY_HASH_SALT"
+  "integration-credentials-key=$INTEGRATION_CREDENTIALS_KEY"
   # The session cache does not read DATABASE_CONNECT_ARGS, so TLS goes in its URL.
   "cache-db-url=postgresql+asyncpg://$PG_ADMIN:$PG_PASSWORD@$PG_HOST:5432/$PG_DB?ssl=require"
 )
@@ -199,6 +205,7 @@ ENVS=(
   # Store API keys hashed (existing plain-text keys are rehashed on startup)
   # and close public sign-up: admins add users from the UI's Members page.
   "HASH_API_KEY=true" "API_KEY_HASH_SALT=secretref:api-key-hash-salt"
+  "INTEGRATION_CREDENTIALS_KEY=secretref:integration-credentials-key"
   "ALLOW_PUBLIC_REGISTRATION=${ALLOW_PUBLIC_REGISTRATION:-false}"
   # Embed triplets at cognify so improve()'s triplet_enrichment stage runs;
   # without it a remember() with no session_id has no improve stage to run.
