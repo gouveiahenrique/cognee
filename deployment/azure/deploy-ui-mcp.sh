@@ -25,9 +25,11 @@ RG="${RG:-rg-cognee}"
 PREFIX="${PREFIX:-cognee}"
 CREDS_FILE="${CREDS_FILE:-$HOME/.cognee-azure/${RG}.env}"
 ACA_ENV="${PREFIX}-env"
-API_APP="${PREFIX}-api"
-UI_APP="${PREFIX}-ui"
-MCP_APP="${PREFIX}-mcp"
+API_APP="${API_APP:-${PREFIX}-api}"
+# UI app name (also its public hostname). Override to rebrand, e.g. UI_APP=context-mesh.
+UI_APP="${UI_APP:-${PREFIX}-ui}"
+UI_REPO="${UI_REPO:-cognee-ui}"
+MCP_APP="${MCP_APP:-${PREFIX}-mcp}"
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo latest)}"
 # Tag the UI image with the frontend tree's content hash, so local (uncommitted)
 # frontend changes produce a new tag and get rebuilt.
@@ -78,11 +80,11 @@ fi
 # Built from this checkout rather than pulling cognee/cognee-ui, so local
 # frontend fixes ship. UI_IMAGE overrides this with a prebuilt image.
 if [ -z "${UI_IMAGE:-}" ]; then
-  UI_IMAGE="$ACR_SERVER/cognee-ui:$UI_TAG"
-  if az acr repository show -n "$ACR" --image "cognee-ui:$UI_TAG" -o none 2>/dev/null; then
-    log "Image cognee-ui:$UI_TAG already in $ACR, skipping build"
+  UI_IMAGE="$ACR_SERVER/$UI_REPO:$UI_TAG"
+  if az acr repository show -n "$ACR" --image "$UI_REPO:$UI_TAG" -o none 2>/dev/null; then
+    log "Image $UI_REPO:$UI_TAG already in $ACR, skipping build"
   else
-    log "Building cognee-ui:$UI_TAG in ACR (linux/amd64)"
+    log "Building $UI_REPO:$UI_TAG in ACR (linux/amd64)"
     # The legacy ACR builder rejects BuildKit-only syntax: drop the syntax
     # directive and turn COPY --chmod into a COPY plus chmod.
     UI_DOCKERFILE="cognee-frontend/.Dockerfile.acr"
@@ -90,7 +92,7 @@ if [ -z "${UI_IMAGE:-}" ]; then
     sed -E -e '/^# syntax=/d' \
       -e 's#^COPY --chmod=755 (docker-entrypoint\.sh) (/usr/local/bin/docker-entrypoint\.sh)#COPY \1 \2\nRUN chmod 755 \2#' \
       cognee-frontend/Dockerfile >"$UI_DOCKERFILE"
-    az acr build -r "$ACR" -t "cognee-ui:$UI_TAG" -t cognee-ui:latest --target runner \
+    az acr build -r "$ACR" -t "$UI_REPO:$UI_TAG" -t "$UI_REPO:latest" --target runner \
       --platform linux/amd64 --timeout 3600 -f "$UI_DOCKERFILE" cognee-frontend --only-show-errors
     rm -f "$UI_DOCKERFILE"
   fi
@@ -168,8 +170,12 @@ if ! az containerapp show -n "$MCP_APP" -g "$RG" -o none 2>/dev/null; then
     --secrets "${MCP_SECRETS[@]}" --env-vars "${MCP_ENVS[@]}" -o none
 else
   az containerapp secret set -n "$MCP_APP" -g "$RG" --secrets "${MCP_SECRETS[@]}" -o none
-  # --container-name: the app has an auth sidecar after the first run.
-  az containerapp update -n "$MCP_APP" -g "$RG" --container-name "$MCP_APP" \
+  # --container-name: the app has an auth sidecar after the first run. The MCP
+  # container keeps the name it was created with, which differs from the app
+  # name when the app was copied under a new one (cognee-mcp -> context-mesh-mcp).
+  MCP_CONTAINER=$(az containerapp show -n "$MCP_APP" -g "$RG" \
+    --query "properties.template.containers[?name!='mcp-auth'] | [0].name" -o tsv)
+  az containerapp update -n "$MCP_APP" -g "$RG" --container-name "$MCP_CONTAINER" \
     --image "$MCP_IMAGE" --set-env-vars "${MCP_ENVS[@]}" -o none
 fi
 

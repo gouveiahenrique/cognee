@@ -29,7 +29,7 @@ CREDS_FILE="${CREDS_FILE:-$HOME/.cognee-azure/${RG}.env}"
 
 LOG_WS="${PREFIX}-logs"
 ACA_ENV="${PREFIX}-env"
-APP="${PREFIX}-api"
+APP="${API_APP:-${PREFIX}-api}"
 PG_SKU="${PG_SKU:-Standard_B1ms}"  # cheapest Flexible Server SKU
 PG_VERSION="${PG_VERSION:-16}"
 PG_DB="cognee_db"
