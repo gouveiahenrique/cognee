@@ -20,8 +20,12 @@ CREDS_FILE="${CREDS_FILE:-$HOME/.cognee-azure/${RG}.env}"
 # shellcheck disable=SC1090
 . "$CREDS_FILE"
 PG_SERVER="${PREFIX}-pg-${SUFFIX}"
+# App names; override after a rename, e.g. API_APP=context-mesh-api.
+API_APP="${API_APP:-${PREFIX}-api}"
+UI_APP="${UI_APP:-${PREFIX}-ui}"
+MCP_APP="${MCP_APP:-${PREFIX}-mcp}"
 
-for app in "${PREFIX}-ui" "${PREFIX}-mcp" "${PREFIX}-api"; do
+for app in "$UI_APP" "$MCP_APP" "$API_APP"; do
   if az containerapp show -n "$app" -g "$RG" -o none 2>/dev/null; then
     echo "==> Scaling $app to zero"
     az containerapp update -n "$app" -g "$RG" --min-replicas 0 --max-replicas 1 -o none
