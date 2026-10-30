@@ -6,7 +6,7 @@ export interface SetChannelRouteResult {
 }
 
 const UNAVAILABLE =
-  "Routing a channel to another workspace needs Cognee Cloud — a self-hosted install has a single workspace to route to.";
+  "Routing a channel to another workspace needs Context Mesh Cloud — a self-hosted install has a single workspace to route to.";
 
 /** Open-source stub — see getChannelRoutes.ts. */
 export default async function setChannelRoute(

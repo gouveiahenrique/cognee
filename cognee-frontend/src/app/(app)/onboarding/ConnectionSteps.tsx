@@ -166,9 +166,9 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
       {!standalone && (
         <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 8 }}>
           <StepBadge step={1} />
-          <h1 style={{ color: "#18181B", fontSize: 28, fontWeight: 600, lineHeight: "34px", margin: 0 }}>Connect your local Cognee SDK</h1>
+          <h1 style={{ color: "#18181B", fontSize: 28, fontWeight: 600, lineHeight: "34px", margin: 0 }}>Connect your local Context Mesh SDK</h1>
           <p style={{ color: "#71717A", fontSize: 15, lineHeight: "22px", margin: 0, textAlign: "center", maxWidth: 540 }}>
-            Use <code style={{ background: "#F4F4F5", padding: "1px 6px", borderRadius: 4, fontSize: 13 }}>cognee.serve()</code> to link your local Python SDK to a remote Cognee instance. All operations (remember, recall, forget, improve) will route to the connected instance.
+            Use <code style={{ background: "#F4F4F5", padding: "1px 6px", borderRadius: 4, fontSize: 13 }}>cognee.serve()</code> to link your local Python SDK to a remote Context Mesh instance. All operations (remember, recall, forget, improve) will route to the connected instance.
           </p>
         </div>
       )}
@@ -177,10 +177,10 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
 
         {/* Connection mode toggle */}
         <div style={{ display: "flex", gap: 0, borderRadius: 8, border: "1px solid #E4E4E7", overflow: "hidden" }}>
-          <button onClick={() => { trackEvent({ pageName: "Onboarding - Local Cognee", eventName: "local_cognee_mode_switched", additionalProperties: { mode: "cloud" } }); setConnectMode("cloud"); }} className="cursor-pointer" style={{ flex: 1, padding: "10px 16px", background: connectMode === "cloud" ? "#F0EDFF" : "#fff", border: "none", fontSize: 13, fontWeight: 500, color: connectMode === "cloud" ? "#6510F4" : "#71717A", fontFamily: "inherit", borderRight: "1px solid #E4E4E7" }}>
-            Connect to Cognee Cloud
+          <button onClick={() => { trackEvent({ pageName: "Onboarding - Local Context Mesh", eventName: "local_cognee_mode_switched", additionalProperties: { mode: "cloud" } }); setConnectMode("cloud"); }} className="cursor-pointer" style={{ flex: 1, padding: "10px 16px", background: connectMode === "cloud" ? "#F0EDFF" : "#fff", border: "none", fontSize: 13, fontWeight: 500, color: connectMode === "cloud" ? "#6510F4" : "#71717A", fontFamily: "inherit", borderRight: "1px solid #E4E4E7" }}>
+            Connect to Context Mesh Cloud
           </button>
-          <button onClick={() => { trackEvent({ pageName: "Onboarding - Local Cognee", eventName: "local_cognee_mode_switched", additionalProperties: { mode: "direct" } }); setConnectMode("direct"); }} className="cursor-pointer" style={{ flex: 1, padding: "10px 16px", background: connectMode === "direct" ? "#F0EDFF" : "#fff", border: "none", fontSize: 13, fontWeight: 500, color: connectMode === "direct" ? "#6510F4" : "#71717A", fontFamily: "inherit" }}>
+          <button onClick={() => { trackEvent({ pageName: "Onboarding - Local Context Mesh", eventName: "local_cognee_mode_switched", additionalProperties: { mode: "direct" } }); setConnectMode("direct"); }} className="cursor-pointer" style={{ flex: 1, padding: "10px 16px", background: connectMode === "direct" ? "#F0EDFF" : "#fff", border: "none", fontSize: 13, fontWeight: 500, color: connectMode === "direct" ? "#6510F4" : "#71717A", fontFamily: "inherit" }}>
             Connect to any instance
           </button>
         </div>
@@ -190,15 +190,15 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
             {/* CLOUD: device code login */}
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                Connect your local Cognee SDK to your cloud tenant using the API Base URL and key from the <a href="/api-keys" style={{ color: "#6510F4", textDecoration: "underline" }}>API Keys</a> page. All operations (remember, recall) will route to cloud.
+                Connect your local Context Mesh SDK to your cloud tenant using the API Base URL and key from the <a href="/api-keys" style={{ color: "#6510F4", textDecoration: "underline" }}>API Keys</a> page. All operations (remember, recall) will route to cloud.
               </span>
             </div>
 
             <div style={{ alignItems: "center", display: "flex", gap: 12 }}>
               <NumberCircle n={1} />
-              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Cognee</span>
+              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Context Mesh</span>
             </div>
-            <CodeBlock step="Local Cognee">pip install cognee</CodeBlock>
+            <CodeBlock step="Local Context Mesh">pip install cognee</CodeBlock>
 
             <Divider />
 
@@ -211,7 +211,7 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
             </span>
             <Link
               href="/api-keys"
-              onClick={() => trackEvent({ pageName: "Onboarding - Local Cognee", eventName: "local_go_to_api_keys" })}
+              onClick={() => trackEvent({ pageName: "Onboarding - Local Context Mesh", eventName: "local_go_to_api_keys" })}
               style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0EDFF", color: "#6510F4", border: "1px solid #DDD6FE", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 500, textDecoration: "none", width: "fit-content" }}
             >
               Go to API Keys
@@ -222,9 +222,9 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
 
             <div style={{ alignItems: "center", display: "flex", gap: 12 }}>
               <NumberCircle n={3} />
-              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Connect and use Cognee</span>
+              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Connect and use Context Mesh</span>
             </div>
-            <MultiLineCode step="Local Cognee" lines={[
+            <MultiLineCode step="Local Context Mesh" lines={[
               "import asyncio",
               "import cognee",
               "",
@@ -256,15 +256,15 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
             {/* DIRECT: URL + API key */}
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                Connect to any Cognee instance — self-hosted, another team member's machine, or a staging environment. Just provide the URL and an optional API key.
+                Connect to any Context Mesh instance — self-hosted, another team member's machine, or a staging environment. Just provide the URL and an optional API key.
               </span>
             </div>
 
             <div style={{ alignItems: "center", display: "flex", gap: 12 }}>
               <NumberCircle n={1} />
-              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Cognee</span>
+              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Context Mesh</span>
             </div>
-            <CodeBlock step="Local Cognee">pip install cognee</CodeBlock>
+            <CodeBlock step="Local Context Mesh">pip install cognee</CodeBlock>
 
             <Divider />
 
@@ -272,7 +272,7 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
               <NumberCircle n={2} />
               <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Connect with URL and API key</span>
             </div>
-            <MultiLineCode step="Local Cognee" lines={[
+            <MultiLineCode step="Local Context Mesh" lines={[
               "import asyncio",
               "import cognee",
               "",
@@ -298,9 +298,9 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <span style={{ color: "#71717A", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase" }}>Local to local</span>
               <span style={{ color: "#A1A1AA", fontSize: 12, lineHeight: "18px" }}>
-                To connect to a Cognee backend running on the same machine or your local network:
+                To connect to a Context Mesh backend running on the same machine or your local network:
               </span>
-              <MultiLineCode step="Local Cognee" lines={[
+              <MultiLineCode step="Local Context Mesh" lines={[
                 "# Inside an async function:",
                 '# Same machine',
                 'await cognee.serve(url="http://localhost:8000")',
@@ -313,7 +313,7 @@ export function LocalCogneeStep({ onBack, onSkip, standalone }: { onBack: () => 
         )}
       </div>
 
-      {!standalone && <NavButtons onBack={onBack} continueDisabled={false} onContinue={onSkip} pageName="Onboarding - Local Cognee" />}
+      {!standalone && <NavButtons onBack={onBack} continueDisabled={false} onContinue={onSkip} pageName="Onboarding - Local Context Mesh" />}
     </div>
   );
 }
@@ -327,7 +327,7 @@ function McpServerContent() {
     <>
       <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
         <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-          Cognee runs as an <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Agent", eventName: "click_out", additionalProperties: { target_url: "https://modelcontextprotocol.io" } })}>MCP (Model Context Protocol)</a> server. Any MCP-compatible client (Claude Desktop, Cursor, VS Code Copilot, etc.) can connect to it as a tool provider.
+          Context Mesh runs as an <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Agent", eventName: "click_out", additionalProperties: { target_url: "https://modelcontextprotocol.io" } })}>MCP (Model Context Protocol)</a> server. Any MCP-compatible client (Claude Desktop, Cursor, VS Code Copilot, etc.) can connect to it as a tool provider.
         </span>
       </div>
 
@@ -363,7 +363,7 @@ function McpServerContent() {
       ) : (
         <>
           <span style={{ color: "#71717A", fontSize: 12, lineHeight: "18px" }}>
-            Connect the MCP server to Cognee Cloud. Use your API Base URL and API key from the <Link href="/api-keys" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Agent", eventName: "mcp_go_to_api_keys" })}>API Keys</Link> page.
+            Connect the MCP server to Context Mesh Cloud. Use your API Base URL and API key from the <Link href="/api-keys" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Agent", eventName: "mcp_go_to_api_keys" })}>API Keys</Link> page.
           </span>
           <MultiLineCode step="Agent" lines={[
             'cognee-mcp --transport sse --port 8001 \\',
@@ -380,7 +380,7 @@ function McpServerContent() {
         <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Add to your MCP client config</span>
       </div>
       <span style={{ color: "#71717A", fontSize: 12, lineHeight: "18px" }}>
-        Add Cognee as a tool server in your MCP client&apos;s configuration:
+        Add Context Mesh as a tool server in your MCP client&apos;s configuration:
       </span>
       <MultiLineCode step="Agent" lines={[
         '{',
@@ -433,7 +433,7 @@ export function AgentStep({ onBack, onSkip, standalone }: { onBack: () => void; 
           <StepBadge step={1} />
           <h1 style={{ color: "#18181B", fontSize: 28, fontWeight: 600, lineHeight: "34px", margin: 0 }}>Connect your Agent</h1>
           <p style={{ color: "#71717A", fontSize: 15, lineHeight: "22px", margin: 0, textAlign: "center", maxWidth: 520 }}>
-            Give any agent memory by connecting it to Cognee. Choose how your agent should integrate.
+            Give any agent memory by connecting it to Context Mesh. Choose how your agent should integrate.
           </p>
         </div>
       )}
@@ -458,13 +458,13 @@ export function AgentStep({ onBack, onSkip, standalone }: { onBack: () => void; 
           <>
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                The Cognee Python SDK works with any agent framework. Use <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>cognee.serve(url, api_key)</code> to connect, then <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>remember</code> / <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>recall</code> from your agent code.
+                The Context Mesh Python SDK works with any agent framework. Use <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>cognee.serve(url, api_key)</code> to connect, then <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>remember</code> / <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>recall</code> from your agent code.
               </span>
             </div>
 
             <div style={{ alignItems: "center", display: "flex", gap: 12 }}>
               <NumberCircle n={1} />
-              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Cognee</span>
+              <span style={{ color: "#18181B", fontSize: 14, fontWeight: 500 }}>Install Context Mesh</span>
             </div>
             <CodeBlock step="Agent">pip install cognee</CodeBlock>
 
@@ -714,7 +714,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
           <StepBadge step={1} />
           <h1 style={{ color: "#18181B", fontSize: 28, fontWeight: 600, lineHeight: "34px", margin: 0 }}>Ingest from Any Source</h1>
           <p style={{ color: "#71717A", fontSize: 15, lineHeight: "22px", margin: 0, textAlign: "center", maxWidth: 560 }}>
-            Cognee uses <a href="https://dlthub.com" target="_blank" rel="noopener noreferrer" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Database", eventName: "click_out", additionalProperties: { target_url: "https://dlthub.com" } })}>dlt (data load tool)</a> to connect to databases, SaaS platforms, and APIs. Data is extracted, loaded into a knowledge graph with schema and relationships preserved, and made searchable.
+            Context Mesh uses <a href="https://dlthub.com" target="_blank" rel="noopener noreferrer" style={{ color: "#6510F4", textDecoration: "underline" }} onClick={() => trackEvent({ pageName: "Onboarding - Database", eventName: "click_out", additionalProperties: { target_url: "https://dlthub.com" } })}>dlt (data load tool)</a> to connect to databases, SaaS platforms, and APIs. Data is extracted, loaded into a knowledge graph with schema and relationships preserved, and made searchable.
           </p>
         </div>
       )}
@@ -734,7 +734,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
             Local / Self-hosted
           </button>
           <button onClick={() => { trackEvent({ pageName: "Onboarding - Database", eventName: "database_mode_switched", additionalProperties: { mode: "cloud" } }); setMode("cloud"); }} className="cursor-pointer" style={{ flex: 1, padding: "8px 14px", background: mode === "cloud" ? "#F4F4F5" : "#fff", border: "none", fontSize: 12, fontWeight: 500, color: mode === "cloud" ? "#18181B" : "#A1A1AA", fontFamily: "inherit" }}>
-            Cognee Cloud
+            Context Mesh Cloud
           </button>
         </div>
 
@@ -744,7 +744,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
               <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span style={{ fontSize: 12, color: "#92400E", lineHeight: "18px" }}>
-              For cloud, the Cognee SDK runs locally to access your data sources, then pushes extracted data to your cloud tenant. Call <code style={{ background: "#FEF3C7", fontSize: 11 }}>cognee.serve(url, api_key)</code> first to connect.
+              For cloud, the Context Mesh SDK runs locally to access your data sources, then pushes extracted data to your cloud tenant. Call <code style={{ background: "#FEF3C7", fontSize: 11 }}>cognee.serve(url, api_key)</code> first to connect.
             </span>
           </div>
         )}
@@ -763,7 +763,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
 
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                Pass your connection string to <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>cognee.add()</code>. Cognee auto-discovers tables, extracts schema and foreign key relationships, and builds a searchable knowledge graph.
+                Pass your connection string to <code style={{ background: "#E4DEFF", padding: "1px 4px", borderRadius: 3, fontSize: 11 }}>cognee.add()</code>. Context Mesh auto-discovers tables, extracts schema and foreign key relationships, and builds a searchable knowledge graph.
               </span>
             </div>
 
@@ -828,7 +828,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
 
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                <strong>{saasConfig.name}</strong> extracts: {saasConfig.extracts}. Cognee converts the extracted data into a knowledge graph with entities, relationships, and embeddings.
+                <strong>{saasConfig.name}</strong> extracts: {saasConfig.extracts}. Context Mesh converts the extracted data into a knowledge graph with entities, relationships, and embeddings.
               </span>
             </div>
 
@@ -869,7 +869,7 @@ export function DatabaseStep({ onBack, onSkip, standalone }: { onBack: () => voi
           <>
             <div style={{ display: "flex", gap: 10, background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 8, padding: "10px 14px" }}>
               <span style={{ fontSize: 12, color: "#52525B", lineHeight: "18px" }}>
-                Upload files directly, pass file paths, or point to CSV files. Cognee auto-detects CSV and treats it as structured data using DLT. Other files (PDF, DOCX, TXT, MD) are processed as documents.
+                Upload files directly, pass file paths, or point to CSV files. Context Mesh auto-detects CSV and treats it as structured data using DLT. Other files (PDF, DOCX, TXT, MD) are processed as documents.
               </span>
             </div>
 

@@ -24,7 +24,7 @@ export default function WaitlistPage() {
             a spot opens up.
           </p>
           <p className="text-[#A09F9D] text-base">
-            Thank you for your patience and interest in Cognee.
+            Thank you for your patience and interest in Context Mesh.
           </p>
         </div>
 

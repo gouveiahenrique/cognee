@@ -159,15 +159,15 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
   const close = () => { cancelAuthorization(); setOpened(false); };
   const title = connection?.connected ? `${name} connected` : `Connect ${name}`;
   const permissions = isDrive
-    ? ["Read files from the folders and shared drives you select", "Keep your imported files searchable in Cognee"]
-    : ["Read messages matching the labels you select", "Keep your imported messages searchable in Cognee"];
+    ? ["Read files from the folders and shared drives you select", "Keep your imported files searchable in Context Mesh"]
+    : ["Read messages matching the labels you select", "Keep your imported messages searchable in Context Mesh"];
 
   return (
     <>
       <DataSourceCard
         cfg={{
           key: provider, name,
-          description: `Read selected ${resourceName} into your Cognee memory.`,
+          description: `Read selected ${resourceName} into your Context Mesh memory.`,
           initials: isDrive ? "Dr" : "Gm",
           logo: isDrive ? "googledrive" : "gmail",
           color: isDrive ? "#4285F4" : "#EA4335",
@@ -205,7 +205,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
             <Loader size={14} color="#BC9BFF" />Waiting for authorization in the {name} window…
           </p>
         ) : <div>
-          <p className="m-0 mb-3.5 text-[13px] leading-[1.5] text-[var(--color-cognee-fg,#EDECEA)]/55">Cognee will be able to:</p>
+          <p className="m-0 mb-3.5 text-[13px] leading-[1.5] text-[var(--color-cognee-fg,#EDECEA)]/55">Context Mesh will be able to:</p>
           <ul className="m-0 mb-[18px] flex list-none flex-col gap-[7px] p-0">
             {permissions.map((permission) => <li key={permission} className="relative pl-[18px] text-[13px] text-[var(--color-cognee-fg,#EDECEA)]">
               <span className="absolute left-0 text-[var(--color-cognee-success,#22C55E)]">✓</span>{permission}
@@ -215,7 +215,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
             className="w-full cursor-pointer rounded-lg border-none bg-cognee-purple py-2.5 text-white transition-colors hover:bg-cognee-purple-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognee-lavender/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             style={{ fontSize: 13, fontWeight: 600 }}>Continue with {name}</button>
           <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Opens Google’s authorization window — this page stays open</p>
-          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Nothing is imported until you select {resourceName} and sync. Imported content is processed by your configured Cognee models.</p>
+          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Nothing is imported until you select {resourceName} and sync. Imported content is processed by your configured Context Mesh models.</p>
         </div>) : <Stack gap="md">
           <Text size="sm" c="dimmed">{connection.account_label ?? "Google account"}</Text>
           <section aria-label={isDrive ? "Choose folders" : "Choose labels"}>
@@ -276,7 +276,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
               <Button color="red" variant="subtle" disabled={busy || syncing} onClick={() => setConfirmDisconnect(true)}>Disconnect</Button>
             </Group> : <Stack gap="sm">
               <Text size="sm">Disconnect this account? Imported data is kept unless you choose deletion.</Text>
-              <Checkbox label="Also delete this account’s imported Cognee dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />
+              <Checkbox label="Also delete this account’s imported Context Mesh dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />
               <Group>
                 <Button color="red" disabled={busy} onClick={() => void act(async () => {
                   try {

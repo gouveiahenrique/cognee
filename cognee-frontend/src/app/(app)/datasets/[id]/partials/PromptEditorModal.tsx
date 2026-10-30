@@ -46,7 +46,7 @@ export default function PromptEditorModal({
         <textarea
           value={text}
           onChange={(e) => onTextChange(e.target.value)}
-          placeholder="Write your extraction prompt here. This prompt will be used by Cognee when extracting entities and relationships from your data.&#10;&#10;Example: Extract all companies, people, and their relationships from the text. Focus on ownership, employment, and partnership relations."
+          placeholder="Write your extraction prompt here. This prompt will be used by Context Mesh when extracting entities and relationships from your data.&#10;&#10;Example: Extract all companies, people, and their relationships from the text. Focus on ownership, employment, and partnership relations."
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, padding: "10px 12px", fontSize: 13, color: "#EDECEA", outline: "none", resize: "vertical", minHeight: 200, maxHeight: 400, lineHeight: "20px" }}
         />
       </div>

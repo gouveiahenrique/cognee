@@ -86,7 +86,7 @@ export default function LinkSlackPage({ code }: LinkSlackPageProps): ReactElemen
           ) : phase === "done" ? (
             <div>
               <p className="m-0 mb-4 text-[13px] leading-[1.6] text-[var(--color-cognee-fg,#EDECEA)]/55">
-                Done. <code>/cognee-recall</code> in Slack now answers as you, from what your Cognee
+                Done. <code>/cognee-recall</code> in Slack now answers as you, from what your Context Mesh
                 account can see.
               </p>
               <Link href="/integrations" className={LINK}>
@@ -107,13 +107,13 @@ export default function LinkSlackPage({ code }: LinkSlackPageProps): ReactElemen
           ) : phase === "wrongWorkspace" ? (
             <p className="m-0 text-[13px] leading-[1.6] text-[var(--color-cognee-warning,#F59E0B)]">
               This link came from a different Slack workspace than the one connected to{" "}
-              <strong className="font-semibold">{workspaceName}</strong>. Switch to the matching Cognee
+              <strong className="font-semibold">{workspaceName}</strong>. Switch to the matching Context Mesh
               workspace at the top of the page, then open the link again.
             </p>
           ) : (
             <div>
               <p className="m-0 mb-4 text-[13px] leading-[1.6] text-[var(--color-cognee-fg,#EDECEA)]/55">
-                This connects your Slack member account to your Cognee account in{" "}
+                This connects your Slack member account to your Context Mesh account in{" "}
                 <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">{workspaceName}</strong>. After that,{" "}
                 <code>/cognee-recall</code> answers as you and only from what your account can see.
                 Nobody else in Slack can use your link.

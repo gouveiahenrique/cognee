@@ -21,24 +21,24 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     buildSteps: (baseUrl, apiKey, loading) => [
       credStep(baseUrl, apiKey, loading),
       {
-        title: "Install the Cognee plugin",
-        description: "Run these in your terminal one at a time — register the Cognee marketplace, then install the memory plugin.",
+        title: "Install the Context Mesh plugin",
+        description: "Run these in your terminal one at a time — register the Context Mesh marketplace, then install the memory plugin.",
         codeBlocks: [
           { code: CLAUDE_MARKETPLACE_ADD },
           { code: CLAUDE_PLUGIN_INSTALL },
         ],
       },
       {
-        title: "Upload something to Cognee",
-        description: "Pick one and paste it into Claude Code — it stores the content in your Cognee memory so you can recall it next.",
+        title: "Upload something to Context Mesh",
+        description: "Pick one and paste it into Claude Code — it stores the content in your Context Mesh memory so you can recall it next.",
         codeBlocks: [
           { label: "Option A · Your existing memory", code: UPLOAD_MEMORY_PROMPT },
           { label: "Option B · Try it with a sample", code: UPLOAD_SAMPLE_PROMPT },
         ],
       },
       {
-        title: "Recall it from Cognee",
-        description: "First run /exit to close the session — that syncs it into Cognee Cloud — then reopen Claude Code and ask the question below. Answering from a fresh session proves it's recalling from your cloud memory.",
+        title: "Recall it from Context Mesh",
+        description: "First run /exit to close the session — that syncs it into Context Mesh Cloud — then reopen Claude Code and ask the question below. Answering from a fresh session proves it's recalling from your cloud memory.",
         codeBlocks: [
           { code: "/exit" },
           { code: RECALL_SAMPLE_PROMPT },
@@ -46,7 +46,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
       },
       {
         title: "You're all set",
-        description: "The Cognee plugin hooks into Claude Code's lifecycle — no curl or manual API calls — and captures your session as you work. When a session ends (e.g. /exit), it consolidates that session into your Cognee Cloud knowledge graph, and every new session automatically recalls it back. Sessions are disposable; your memory isn't.",
+        description: "The Context Mesh plugin hooks into Claude Code's lifecycle — no curl or manual API calls — and captures your session as you work. When a session ends (e.g. /exit), it consolidates that session into your Context Mesh Cloud knowledge graph, and every new session automatically recalls it back. Sessions are disposable; your memory isn't.",
       },
     ],
   },
@@ -59,8 +59,8 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     buildSteps: (baseUrl, apiKey, loading) => [
       credStep(baseUrl, apiKey, loading),
       {
-        title: "Install the Cognee plugin",
-        description: "Run these in your terminal one at a time — enable Codex hooks, register the Cognee marketplace, then install the memory plugin.",
+        title: "Install the Context Mesh plugin",
+        description: "Run these in your terminal one at a time — enable Codex hooks, register the Context Mesh marketplace, then install the memory plugin.",
         codeBlocks: [
           { code: CODEX_HOOKS_ENABLE },
           { code: CODEX_MARKETPLACE_ADD },
@@ -68,16 +68,16 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         ],
       },
       {
-        title: "Upload something to Cognee",
-        description: "Pick one and paste it into Codex — it stores the content in your Cognee memory so you can recall it next.",
+        title: "Upload something to Context Mesh",
+        description: "Pick one and paste it into Codex — it stores the content in your Context Mesh memory so you can recall it next.",
         codeBlocks: [
           { label: "Option A · Your existing memory", code: UPLOAD_MEMORY_PROMPT },
           { label: "Option B · Try it with a sample", code: UPLOAD_SAMPLE_PROMPT },
         ],
       },
       {
-        title: "Recall it from Cognee",
-        description: "First run /exit to close the session — that syncs it into Cognee Cloud — then reopen Codex and ask the question below. Answering from a fresh session proves it's recalling from your cloud memory.",
+        title: "Recall it from Context Mesh",
+        description: "First run /exit to close the session — that syncs it into Context Mesh Cloud — then reopen Codex and ask the question below. Answering from a fresh session proves it's recalling from your cloud memory.",
         codeBlocks: [
           { code: "/exit" },
           { code: RECALL_SAMPLE_PROMPT },
@@ -85,7 +85,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
       },
       {
         title: "You're all set",
-        description: "The Cognee plugin hooks into Codex's lifecycle — no curl or manual API calls — and captures your session as you work. When a session ends (e.g. /exit), it consolidates that session into your Cognee Cloud knowledge graph, and every new session automatically recalls it back. Sessions are disposable; your memory isn't.",
+        description: "The Context Mesh plugin hooks into Codex's lifecycle — no curl or manual API calls — and captures your session as you work. When a session ends (e.g. /exit), it consolidates that session into your Context Mesh Cloud knowledge graph, and every new session automatically recalls it back. Sessions are disposable; your memory isn't.",
       },
     ],
   },
@@ -93,12 +93,12 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "openclaw",
     name: "OpenClaw",
     cta: "Connect via prompts",
-    description: "Recall your Cognee memory in every OpenClaw conversation.",
+    description: "Recall your Context Mesh memory in every OpenClaw conversation.",
     icon: imgIcon("/visuals/logos/openclaw.svg", "OpenClaw"),
     buildSteps: (baseUrl, apiKey, loading) => [
       credStep(baseUrl, apiKey, loading),
       // OpenClaw only loads AGENTS.md from its workspace directory, not the project root.
-      { title: "Create the workspace AGENTS.md", description: "Run this command to add the Cognee memory instructions to OpenClaw's workspace. An existing AGENTS.md is backed up to AGENTS.md.bak — merge it manually afterwards.", code: "~/.openclaw/workspace/AGENTS.md", codeToCopy: `mkdir -p ~/.openclaw/workspace && [ -f ~/.openclaw/workspace/AGENTS.md ] && cp ~/.openclaw/workspace/AGENTS.md ~/.openclaw/workspace/AGENTS.md.bak; cat > ~/.openclaw/workspace/AGENTS.md << 'COGNEE_EOF'\n${OPENCLAW_PROMPT}\nCOGNEE_EOF` },
+      { title: "Create the workspace AGENTS.md", description: "Run this command to add the Context Mesh memory instructions to OpenClaw's workspace. An existing AGENTS.md is backed up to AGENTS.md.bak — merge it manually afterwards.", code: "~/.openclaw/workspace/AGENTS.md", codeToCopy: `mkdir -p ~/.openclaw/workspace && [ -f ~/.openclaw/workspace/AGENTS.md ] && cp ~/.openclaw/workspace/AGENTS.md ~/.openclaw/workspace/AGENTS.md.bak; cat > ~/.openclaw/workspace/AGENTS.md << 'COGNEE_EOF'\n${OPENCLAW_PROMPT}\nCOGNEE_EOF` },
       { title: "Test the connection", description: `Open OpenClaw and ask: "What do you know from cognee?" — if it responds with knowledge from your brain, you're connected.` },
     ],
   },
@@ -106,7 +106,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "claude-desktop",
     name: "Claude Desktop",
     cta: "Connect via MCP",
-    description: "Recall your Cognee memory in every conversation.",
+    description: "Recall your Context Mesh memory in every conversation.",
     icon: imgIcon("/visuals/logos/claude.svg", "Claude Desktop"),
     buildSteps: (baseUrl, apiKey, loading) => [
       installUvStep(),
@@ -119,7 +119,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         ),
       },
       {
-        title: "Add the Cognee server to the config",
+        title: "Add the Context Mesh server to the config",
         description: (
           <>
             Merge the highlighted block into your config — eyeball it against your open file.
@@ -152,7 +152,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "cursor",
     name: "Cursor",
     cta: "Connect via MCP",
-    description: "Ground Cursor's agent in your Cognee memory.",
+    description: "Ground Cursor's agent in your Context Mesh memory.",
     icon: imgIcon("/visuals/logos/cursor.svg", "Cursor"),
     buildSteps: (baseUrl, apiKey, loading) => [
       installUvStep(),
@@ -166,7 +166,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         ),
       },
       {
-        title: "Add the Cognee server to mcp.json",
+        title: "Add the Context Mesh server to mcp.json",
         description: (
           <>
             Paste the highlighted <strong style={{ color: "#EDECEA" }}>{'"cognee"'}</strong> entry inside the <strong style={{ color: "#EDECEA" }}>{'"mcpServers"'}</strong> block, then save. The copy button grabs just that entry — the dimmed braces show where it lands.
@@ -199,11 +199,11 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "hermes",
     name: "Hermes Agent",
     cta: "Connect via MCP",
-    description: "Ground Hermes Agent in your Cognee memory.",
+    description: "Ground Hermes Agent in your Context Mesh memory.",
     icon: imgIcon("/visuals/logos/hermes.svg", "Hermes Agent"),
     buildSteps: (baseUrl, apiKey, loading) => [
-      { title: "Configure Hermes Agent", description: "Hermes reads YAML — add this block under mcp_servers in ~/.hermes/config.yaml and restart the agent. Cognee runs via uvx (requires uv) — no separate install.", code: "~/.hermes/config.yaml", codeToCopy: fillTemplate(HERMES_MCP_CONFIG, baseUrl, apiKey), loading },
-      { title: "Test the connection", description: "Ask Hermes: \"What do you know from cognee?\" — it should use the Cognee memory tool and return a response from your brain." },
+      { title: "Configure Hermes Agent", description: "Hermes reads YAML — add this block under mcp_servers in ~/.hermes/config.yaml and restart the agent. Context Mesh runs via uvx (requires uv) — no separate install.", code: "~/.hermes/config.yaml", codeToCopy: fillTemplate(HERMES_MCP_CONFIG, baseUrl, apiKey), loading },
+      { title: "Test the connection", description: "Ask Hermes: \"What do you know from cognee?\" — it should use the Context Mesh memory tool and return a response from your brain." },
     ],
   },
   {
@@ -214,18 +214,18 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     icon: imgIcon("/visuals/logos/vscode.svg", "VS Code"),
     buildSteps: (baseUrl, apiKey, loading) => [
       {
-        title: "Install the Cognee extension",
+        title: "Install the Context Mesh extension",
         description: (
           <>
-            Open the <strong style={{ color: "#EDECEA" }}>Extensions</strong> view (<strong style={{ color: "#EDECEA" }}>⇧⌘X</strong> / <strong style={{ color: "#EDECEA" }}>Ctrl+Shift+X</strong>), search for <strong style={{ color: "#EDECEA" }}>Cognee</strong>, and click <strong style={{ color: "#EDECEA" }}>Install</strong> on <strong style={{ color: "#EDECEA" }}>“Cognee — Project Memory”</strong> by Cognee.
+            Open the <strong style={{ color: "#EDECEA" }}>Extensions</strong> view (<strong style={{ color: "#EDECEA" }}>⇧⌘X</strong> / <strong style={{ color: "#EDECEA" }}>Ctrl+Shift+X</strong>), search for <strong style={{ color: "#EDECEA" }}>Context Mesh</strong>, and click <strong style={{ color: "#EDECEA" }}>Install</strong> on <strong style={{ color: "#EDECEA" }}>“Context Mesh — Project Memory”</strong> by Context Mesh.
           </>
         ),
       },
       {
-        title: "Run Cognee: Set Up",
+        title: "Run Context Mesh: Set Up",
         description: (
           <>
-            Open the <strong style={{ color: "#EDECEA" }}>Command Palette</strong> (<strong style={{ color: "#EDECEA" }}>⇧⌘P</strong> / <strong style={{ color: "#EDECEA" }}>Ctrl+Shift+P</strong>) and run <strong style={{ color: "#EDECEA" }}>Cognee: Set Up</strong>. Paste your <strong style={{ color: "#EDECEA" }}>endpoint</strong>, then your <strong style={{ color: "#EDECEA" }}>API key</strong> — stored in your OS keychain, not settings. A health check confirms the connection.
+            Open the <strong style={{ color: "#EDECEA" }}>Command Palette</strong> (<strong style={{ color: "#EDECEA" }}>⇧⌘P</strong> / <strong style={{ color: "#EDECEA" }}>Ctrl+Shift+P</strong>) and run <strong style={{ color: "#EDECEA" }}>Context Mesh: Set Up</strong>. Paste your <strong style={{ color: "#EDECEA" }}>endpoint</strong>, then your <strong style={{ color: "#EDECEA" }}>API key</strong> — stored in your OS keychain, not settings. A health check confirms the connection.
           </>
         ),
         codeBlocks: [
@@ -237,10 +237,10 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         title: "Use the core commands",
         description: (
           <>
-            Everything lives in the <strong style={{ color: "#EDECEA" }}>Command Palette</strong> under <strong style={{ color: "#EDECEA" }}>Cognee</strong>. Start with these:
-            {"\n\n"}• <strong style={{ color: "#EDECEA" }}>Cognee: Remember Selection</strong> — store selected code (or the whole file) in this repo&apos;s memory.
-            {"\n"}• <strong style={{ color: "#EDECEA" }}>Cognee: Ask My Project Memory</strong> — ask a question; answers come with clickable citations.
-            {"\n"}• <strong style={{ color: "#EDECEA" }}>Cognee: Index Workspace</strong> — bulk-ingest the whole repo at once.
+            Everything lives in the <strong style={{ color: "#EDECEA" }}>Command Palette</strong> under <strong style={{ color: "#EDECEA" }}>Context Mesh</strong>. Start with these:
+            {"\n\n"}• <strong style={{ color: "#EDECEA" }}>Context Mesh: Remember Selection</strong> — store selected code (or the whole file) in this repo&apos;s memory.
+            {"\n"}• <strong style={{ color: "#EDECEA" }}>Context Mesh: Ask My Project Memory</strong> — ask a question; answers come with clickable citations.
+            {"\n"}• <strong style={{ color: "#EDECEA" }}>Context Mesh: Index Workspace</strong> — bulk-ingest the whole repo at once.
             {"\n\n"}
             <a href="https://docs.cognee.ai/cognee-cloud/agent-integrations/vscode" target="_blank" rel="noopener noreferrer" style={{ color: "#6510F4", textDecoration: "underline" }}>See all commands and settings →</a>
           </>
@@ -252,7 +252,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "gemini-cli",
     name: "Gemini CLI",
     cta: "Connect via MCP",
-    description: "Ground Gemini CLI in your Cognee memory.",
+    description: "Ground Gemini CLI in your Context Mesh memory.",
     icon: imgIcon("/visuals/logos/gemini.svg", "Gemini CLI"),
     buildSteps: (baseUrl, apiKey, loading) => [
       installUvStep(),
@@ -267,7 +267,7 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         code: "~/.gemini/settings.json",
       },
       {
-        title: "Add the Cognee server and save",
+        title: "Add the Context Mesh server and save",
         description: (
           <>
             Make your file look like the block below, then <strong style={{ color: "#EDECEA" }}>save</strong>. Everything is shown in full — your tenant URL and key included — so you can see exactly what you are adding.
@@ -304,24 +304,24 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
     key: "cline",
     name: "Cline",
     cta: "Connect via MCP",
-    description: "Ground Cline in your Cognee memory.",
+    description: "Ground Cline in your Context Mesh memory.",
     icon: imgIcon("/visuals/logos/cline.svg", "Cline"),
     buildSteps: (baseUrl, apiKey, loading) => [
-      { title: "Configure Cline", description: "In VS Code, open the Cline sidebar → MCP Servers → Configure MCP Servers — paste this JSON block and save. Cognee runs via uvx (requires uv) — no separate install.", code: '{ "mcpServers": { "cognee": … } }', codeToCopy: fillTemplate(MCP_STDIO_CONFIG, baseUrl, apiKey), loading },
-      { title: "Test the connection", description: "Ask Cline: \"What do you know from cognee?\" — it should use the Cognee memory tool and return a response from your brain." },
+      { title: "Configure Cline", description: "In VS Code, open the Cline sidebar → MCP Servers → Configure MCP Servers — paste this JSON block and save. Context Mesh runs via uvx (requires uv) — no separate install.", code: '{ "mcpServers": { "cognee": … } }', codeToCopy: fillTemplate(MCP_STDIO_CONFIG, baseUrl, apiKey), loading },
+      { title: "Test the connection", description: "Ask Cline: \"What do you know from cognee?\" — it should use the Context Mesh memory tool and return a response from your brain." },
     ],
   },
   {
     key: "https-api",
     name: "API / MCP",
     cta: "Connect via API or MCP",
-    description: "Call Cognee directly from any HTTP client or custom agent.",
+    description: "Call Context Mesh directly from any HTTP client or custom agent.",
     icon: <ApiIcon />,
     buildSteps: (baseUrl, apiKey, loading) => [
       credStep(baseUrl, apiKey, loading),
       {
         title: "Query the REST API",
-        description: "Send a recall query to your Cognee endpoint from any HTTP client or language.",
+        description: "Send a recall query to your Context Mesh endpoint from any HTTP client or language.",
         code: `curl -X POST ${baseUrl}/api/v1/recall`,
         codeToCopy: fillTemplate(
           'curl -X POST {{BASE_URL}}/api/v1/recall \\\n  -H "X-Api-Key: {{API_KEY}}" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"query": "What are the main entities?"}\'',
@@ -330,12 +330,12 @@ export const AGENT_CARDS: SetupConnectorCfg[] = [
         loading,
       },
       {
-        title: "Or install the Cognee skill",
-        description: "Prefer skills? Run this command from your project root to create the skill file, then point your agent at it (skills directory, instructions file, or system prompt). The skill teaches your agent to call the Cognee API using the credentials from step 1.",
+        title: "Or install the Context Mesh skill",
+        description: "Prefer skills? Run this command from your project root to create the skill file, then point your agent at it (skills directory, instructions file, or system prompt). The skill teaches your agent to call the Context Mesh API using the credentials from step 1.",
         code: "skills/cognee/SKILL.md",
         codeToCopy: genericSkillInstall("mac"),
       },
-      { title: "Test the connection", description: "Ask your agent: \"What do you know from cognee?\" — Cognee's memory tool should respond with knowledge from your brain." },
+      { title: "Test the connection", description: "Ask your agent: \"What do you know from cognee?\" — Context Mesh's memory tool should respond with knowledge from your brain." },
     ],
   },
 ];

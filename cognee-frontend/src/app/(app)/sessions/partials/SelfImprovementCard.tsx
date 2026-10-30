@@ -6,7 +6,7 @@ import type { EnrichmentRun } from "@/modules/sessions/getSessions";
 import { formatDate, formatRelativeTime } from "./format";
 
 const INFO_TEXT =
-  "As a session accumulates turns or goes idle, Cognee automatically runs improve(): the session's questions, answers and feedback are bridged into the permanent knowledge graph — weighting existing memories by feedback, persisting the conversation, distilling reusable lessons and enriching the graph. Future sessions recall from the enriched graph.";
+  "As a session accumulates turns or goes idle, Context Mesh automatically runs improve(): the session's questions, answers and feedback are bridged into the permanent knowledge graph — weighting existing memories by feedback, persisting the conversation, distilling reusable lessons and enriching the graph. Future sessions recall from the enriched graph.";
 
 const STATUS_META = {
   completed: { color: "#22C55E", label: "Completed" },

@@ -170,7 +170,7 @@ export default function ApiKeysPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           <h1 style={{ fontSize: 20, fontWeight: 300, color: "#EDECEA", margin: 0, fontFamily: '"TWKLausanne", sans-serif' }}>API Keys</h1>
-          <span style={{ fontSize: 14, color: "rgba(237,236,234,0.55)" }}>Manage keys for programmatic access to the Cognee API.</span>
+          <span style={{ fontSize: 14, color: "rgba(237,236,234,0.55)" }}>Manage keys for programmatic access to the Context Mesh API.</span>
         </div>
         <button
           onClick={() => { trackEvent({ pageName: "API Keys", eventName: "api_key_create_clicked" }); setShowCreateModal(true); }}

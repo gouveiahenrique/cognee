@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/modules/users/useCurrentUser";
 import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
-import Image from "next/image";
 import Link from "next/link";
 import HelpMenu from "./HelpMenu";
 import ProfileMenu from "./ProfileMenu";
@@ -92,7 +91,9 @@ export default function TopBar() {
       <div className="flex items-center" style={{ gap: 8 }}>
         {/* Logo fixed-width box so workspace aligns with right edge of navbar (240px - 24px padding) */}
         <div style={{ width: 240, flexShrink: 0, display: "flex", alignItems: "center" }}>
-          <Image src="/cognee-logo-black.svg" alt="Cognee" width={110} height={24} style={{ flexShrink: 0, filter: "invert(1)" }} />
+          <span style={{ flexShrink: 0, fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", color: "#EDECEA", whiteSpace: "nowrap" }}>
+            Context<span style={{ color: "#BC9BFF" }}>Mesh</span>
+          </span>
         </div>
 
         {/* 1. Workspace switcher */}

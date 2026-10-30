@@ -84,7 +84,7 @@ test("does not discard selected IDs missing from the listing", async () => {
 test.each([false, true])("disconnect needs confirmation and defaults to retaining data: %s", async (deleteData) => {
   await manage();
   fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
-  const checkbox = screen.getByLabelText("Also delete this account’s imported Cognee dataset");
+  const checkbox = screen.getByLabelText("Also delete this account’s imported Context Mesh dataset");
   expect(checkbox).not.toBeChecked();
   expect(api.disconnect).not.toHaveBeenCalled();
   if (deleteData) fireEvent.click(checkbox);

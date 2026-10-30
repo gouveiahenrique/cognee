@@ -570,7 +570,7 @@ export default function SessionsPage() {
             </div>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#EDECEA" }}>No sessions yet</span>
             <p style={{ fontSize: 14, color: "rgba(237,236,234,0.35)", margin: 0, maxWidth: 360, textAlign: "center" }}>
-              When an agent connects to Cognee and reads or writes memory, its session will appear here with tools used, observations, and cost.
+              When an agent connects to Context Mesh and reads or writes memory, its session will appear here with tools used, observations, and cost.
             </p>
           </div>
         </div>

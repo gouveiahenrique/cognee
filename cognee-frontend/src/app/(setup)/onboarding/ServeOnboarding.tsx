@@ -59,9 +59,9 @@ function ServeStep1({ onNext }: { onNext: () => void }) {
     <div className="flex flex-col items-center gap-8 flex-1" style={{ paddingTop: 48, paddingBottom: 48, paddingInline: 80 }}>
       <div className="flex flex-col items-center gap-2">
         <StepBadge step={1} />
-        <h1 style={{ fontSize: 28, fontWeight: 300, color: "#EDECEA", margin: 0, fontFamily: '"TWKLausanne", sans-serif', letterSpacing: "-0.02em" }}>Connected to Cognee Cloud</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 300, color: "#EDECEA", margin: 0, fontFamily: '"TWKLausanne", sans-serif', letterSpacing: "-0.02em" }}>Connected to Context Mesh Cloud</h1>
         <p style={{ fontSize: 15, color: "rgba(237,236,234,0.55)", margin: 0, textAlign: "center", lineHeight: "22px", maxWidth: 480 }}>
-          Your local SDK is connected to your Cognee Cloud instance via <code style={{ background: "rgba(255,255,255,0.1)", color: "#EDECEA", padding: "1px 6px", borderRadius: 4, fontSize: 13 }}>cognee.serve()</code>.
+          Your local SDK is connected to your Context Mesh Cloud instance via <code style={{ background: "rgba(255,255,255,0.1)", color: "#EDECEA", padding: "1px 6px", borderRadius: 4, fontSize: 13 }}>cognee.serve()</code>.
           You can now use both the SDK and this UI to manage your knowledge graph.
         </p>
       </div>
