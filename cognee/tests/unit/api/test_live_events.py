@@ -106,6 +106,24 @@ async def test_timezone_aware_since_is_normalized_before_comparing():
 
 
 @pytest.mark.asyncio
+async def test_timezone_aware_event_times_are_normalized_before_comparing():
+    """Improve/trace events from the Postgres cache carry an offset; mixed with
+    naive QA times and a since cursor they must filter, not raise TypeError."""
+    events = [
+        _event("2026-08-03T09:00:01+00:00", kind="improve"),
+        _event("2026-08-03T09:00:10.000000"),
+        _event("2026-08-03T12:00:20+03:00", kind="improve"),  # 09:00:20 UTC
+    ]
+    since = datetime(2026, 8, 3, 9, 0, 5, tzinfo=timezone.utc)
+
+    ctx_a, ctx_b = _patches(events)
+    with ctx_a, ctx_b:
+        result = await visualize_module.get_live_events(DATASET_ID, since=since)
+
+    assert result["events"] == events[1:]
+
+
+@pytest.mark.asyncio
 async def test_unauthorized_dataset_raises_permission_denied():
     ctx_a, ctx_b = _patches([], authorized=False)
     with ctx_a, ctx_b, pytest.raises(PermissionDeniedError):

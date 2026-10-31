@@ -32,11 +32,13 @@ from typing_extensions import TypedDict, Unpack
 from cognee.api.v1.serve.state import get_remote_client
 from cognee.infrastructure.background_tasks import register_background_task
 from cognee.infrastructure.locks.session_lock import (
+    hand_off_improve_sessions,
     has_pending_improve_rerun,
     improve_lock_keys,
     release_improve_lock_many,
     release_or_rerun_improve_lock_many,
     request_improve_rerun_many,
+    take_improve_session_handoffs,
     try_acquire_improve_lock_many,
 )
 from cognee.modules.improve import (
@@ -88,6 +90,40 @@ def _session_lock_keys(lock_keys: tuple[str, ...]) -> list[str]:
     one enrichment and the rest waits for the next improve.
     """
     return [key for key in lock_keys if key.startswith("session:")]
+
+
+async def _improve_handed_off_sessions(dataset_id: Any, dataset_key: str) -> None:
+    """Start one background improve per user for sessions handed to this run.
+
+    Runs after the claim is released. A follow-up that loses the claim again
+    hands its sessions on in turn, so a session never waits for an improve that
+    nobody will start. Failures are logged: the handing-off callers already
+    returned.
+    """
+    handoffs = await take_improve_session_handoffs(dataset_key)
+    if not handoffs:
+        return
+    by_user: dict[Any, tuple[Any, list[str]]] = {}
+    for user, session_id in handoffs:
+        entry = by_user.setdefault(getattr(user, "id", user), (user, []))
+        entry[1].append(session_id)
+
+    for user, session_ids in by_user.values():
+        logger.info(
+            "improve: running handed-off session(s) %s on dataset %s",
+            ", ".join(session_ids),
+            dataset_id,
+        )
+
+        async def _follow_up(user=user, session_ids=session_ids):
+            try:
+                await improve(dataset=dataset_id, session_ids=session_ids, user=user)
+            except Exception as error:
+                logger.warning(
+                    "improve: handed-off session improve failed: %s", error, exc_info=True
+                )
+
+        register_background_task(asyncio.create_task(_follow_up()))
 
 
 class ImproveKwargs(TypedDict, total=False):
@@ -299,6 +335,7 @@ async def improve(
                 operation.set_outcome(OperationOutcome.NOOP)
             if not released:
                 await release_improve_lock_many(lock_keys)
+            await _improve_handed_off_sessions(inputs.dataset_id, lock_keys[-1])
 
     session_ids = [session_id for session_id in (session_ids or []) if session_id]
     _send_improve_telemetry(
@@ -348,6 +385,13 @@ async def improve(
                 # more pass, so this run's newer entries are covered without a
                 # retry. A dataset-only collision has no such promise.
                 rerun_requested = await request_improve_rerun_many(_session_lock_keys(lock_keys))
+                if not rerun_requested and inputs.session_ids:
+                    # Only the dataset key was held, so no holder's rerun pass
+                    # covers our sessions: hand them to that holder, which
+                    # improves them after it releases.
+                    rerun_requested = await hand_off_improve_sessions(
+                        lock_keys[-1], inputs.user, inputs.session_ids
+                    )
                 return report(
                     _skip_lock_held_run(
                         operation, inputs, lock_keys, rerun_requested=rerun_requested

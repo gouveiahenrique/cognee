@@ -9,6 +9,10 @@
 # (Postgres admin password, default-user password, JWT secrets) are written to
 # $CREDS_FILE (mode 600) and reused on re-runs, so the script is idempotent.
 #
+# GitHub / Linear connectors: set GITHUB_* / LINEAR_* in the .env (see
+# .env.template) and they are passed to the API; callback and frontend URLs
+# default to this deployment's API and UI apps.
+#
 # Image: by default the image is built in a private ACR from ./Dockerfile and the
 # app pulls it with its managed identity (needs rights to create an AcrPull role
 # assignment). Set IMAGE to a public image (e.g. IMAGE=docker.io/cognee/cognee:1.6.3)
@@ -61,6 +65,11 @@ fi
 # and kept: changing the salt invalidates every stored API key.
 if ! grep -q '^API_KEY_HASH_SALT=' "$CREDS_FILE"; then
   echo "API_KEY_HASH_SALT=$(openssl rand -hex 32)" >>"$CREDS_FILE"
+fi
+# Encrypts stored integration tokens (GitHub, Linear, Google). Generated once and
+# kept: changing it makes every stored connection undecryptable.
+if ! grep -q '^INTEGRATION_CREDENTIALS_KEY=' "$CREDS_FILE"; then
+  echo "INTEGRATION_CREDENTIALS_KEY=$(openssl rand -base64 32)" >>"$CREDS_FILE"
 fi
 # shellcheck disable=SC1090
 . "$CREDS_FILE"
@@ -163,6 +172,7 @@ SECRETS=(
   "reset-secret=$FASTAPI_USERS_RESET_PASSWORD_TOKEN_SECRET"
   "verify-secret=$FASTAPI_USERS_VERIFICATION_TOKEN_SECRET"
   "api-key-hash-salt=$API_KEY_HASH_SALT"
+  "integration-credentials-key=$INTEGRATION_CREDENTIALS_KEY"
   # The session cache does not read DATABASE_CONNECT_ARGS, so TLS goes in its URL.
   "cache-db-url=postgresql+asyncpg://$PG_ADMIN:$PG_PASSWORD@$PG_HOST:5432/$PG_DB?ssl=require"
 )
@@ -195,15 +205,49 @@ ENVS=(
   # Store API keys hashed (existing plain-text keys are rehashed on startup)
   # and close public sign-up: admins add users from the UI's Members page.
   "HASH_API_KEY=true" "API_KEY_HASH_SALT=secretref:api-key-hash-salt"
+  "INTEGRATION_CREDENTIALS_KEY=secretref:integration-credentials-key"
   "ALLOW_PUBLIC_REGISTRATION=${ALLOW_PUBLIC_REGISTRATION:-false}"
+  # Embed triplets at cognify so improve()'s triplet_enrichment stage runs;
+  # without it a remember() with no session_id has no improve stage to run.
+  "TRIPLET_EMBEDDING=${TRIPLET_EMBEDDING:-true}"
 )
 # Non-secret LLM/embedding settings copied from the .env when present.
 for k in LLM_PROVIDER LLM_MODEL LLM_ENDPOINT LLM_API_VERSION EMBEDDING_PROVIDER \
   EMBEDDING_MODEL EMBEDDING_DIMENSIONS EMBEDDING_ENDPOINT EMBEDDING_API_VERSION \
-  STRUCTURED_OUTPUT_FRAMEWORK; do
+  STRUCTURED_OUTPUT_FRAMEWORK \
+  LLM_EXTRACTION_MODEL LLM_SUMMARIZATION_MODEL LLM_QUERY_MODEL; do
   v=$(env_get "$k")
   if [ -n "$v" ]; then ENVS+=("$k=$v"); fi
 done
+
+# GitHub App / Linear OAuth app, each only when its client id is in the .env.
+# Secret values become Container Apps secrets; the callback and frontend URLs
+# default to this deployment's own API and UI apps (deploy-ui-mcp.sh names the
+# UI "${PREFIX}-ui"), so only the app registration values need to be supplied.
+DOMAIN=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query properties.defaultDomain -o tsv)
+add_integration() {
+  local provider=$1 prefix=$2 secret_keys=$3 plain_keys=$4 k v name
+  [ -n "$(env_get "${prefix}_CLIENT_ID")" ] || return 0
+  log "Configuring the $provider integration"
+  for k in $secret_keys; do
+    v=$(env_get "${prefix}_$k")
+    [ -n "$v" ] || { echo "${prefix}_$k missing in $ENV_FILE" >&2; exit 1; }
+    name="$provider-$(echo "$k" | tr 'A-Z_' 'a-z-')"
+    SECRETS+=("$name=$v")
+    ENVS+=("${prefix}_$k=secretref:$name")
+  done
+  for k in $plain_keys; do
+    v=$(env_get "${prefix}_$k")
+    [ -n "$v" ] || { echo "${prefix}_$k missing in $ENV_FILE" >&2; exit 1; }
+    ENVS+=("${prefix}_$k=$v")
+  done
+  v=$(env_get "${prefix}_REDIRECT_URI")
+  ENVS+=("${prefix}_REDIRECT_URI=${v:-https://${APP}.${DOMAIN}/api/v1/integrations/${provider}/callback}")
+  v=$(env_get "${prefix}_FRONTEND_BASE_URL")
+  ENVS+=("${prefix}_FRONTEND_BASE_URL=${v:-https://${PREFIX}-ui.${DOMAIN}}")
+}
+add_integration github GITHUB "CLIENT_SECRET APP_PRIVATE_KEY WEBHOOK_SECRET" "CLIENT_ID APP_ID APP_SLUG"
+add_integration linear LINEAR "CLIENT_SECRET WEBHOOK_SECRET" "CLIENT_ID"
 
 if [ -n "${IMAGE:-}" ]; then
   APP_IMAGE="$IMAGE"

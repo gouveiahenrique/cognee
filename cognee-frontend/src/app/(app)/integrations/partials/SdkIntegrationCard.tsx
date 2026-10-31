@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Butt
 import { Group, Loader, Stack, Text } from "@mantine/core";
 import Link from "next/link";
 import ModalShell from "@/ui/elements/ModalShell";
-import { googleApi, googleAuthorizeUrl, googleError, type GoogleConnection, type GoogleProvider, type GoogleResources } from "@/modules/integrations/googleApi";
+import { authorizeUrlFor, googleApi, googleError, type GoogleConnection, type GoogleResources, type SdkProvider } from "@/modules/integrations/googleApi";
+import { SDK_INTEGRATIONS } from "@/modules/integrations/sdkIntegrations";
 import { describeOAuthFailure, isFailureOutcome, takeOAuthOutcome } from "@/modules/integrations/oauthOutcome";
 import DataSourceCard from "./DataSourceCard";
 import ConnectorLogo from "./ConnectorLogo";
@@ -30,14 +31,14 @@ function Checkbox({ label, description, ...props }: InputHTMLAttributes<HTMLInpu
   </label>;
 }
 
-export default function GoogleIntegrationCard({ provider, connecting, setConnecting }: {
-  provider: GoogleProvider;
-  connecting: GoogleProvider | null;
-  setConnecting: (provider: GoogleProvider | null) => void;
+export default function SdkIntegrationCard({ provider, connecting, setConnecting }: {
+  provider: SdkProvider;
+  connecting: SdkProvider | null;
+  setConnecting: (provider: SdkProvider | null) => void;
 }) {
-  const isDrive = provider === "google_drive";
-  const name = isDrive ? "Google Drive" : "Gmail";
-  const resourceName = isDrive ? "folders and shared drives" : "labels";
+  const cfg = SDK_INTEGRATIONS[provider];
+  const { name, vendor } = cfg;
+  const picker = cfg.resources;
   const [connection, setConnection] = useState<GoogleConnection>();
   const [statusError, setStatusError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,8 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
   }, [refreshStatus, setConnecting]);
 
   const loadResources = useCallback(async () => {
+    // Providers without a picker 404 on /resources; there is nothing to load.
+    if (!picker) return;
     setResources(undefined);
     setError(null);
     setResourceError(null);
@@ -84,14 +87,14 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
     } catch (err) {
       if (mounted.current) { setError(googleError(err)); setResourceError(googleError(err)); }
     }
-  }, [provider]);
+  }, [provider, picker]);
 
   useEffect(() => {
     if (opened && connection?.connected) void loadResources();
   }, [opened, connection?.connected, loadResources]);
 
   async function connect() {
-    const popup = window.open("", "cognee-google-oauth", "width=600,height=760");
+    const popup = window.open("", `cognee-${provider}-oauth`, "width=600,height=760");
     if (!popup) { setError("Allow popups for this site, then try connecting again."); return; }
     popupWindow.current = popup;
     const startedAt = Date.now();
@@ -101,7 +104,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
     try {
       const result = await googleApi.authorize(provider);
       if (!mounted.current || popup.closed) { popup.close(); setConnecting(null); return; }
-      popup.location.href = googleAuthorizeUrl(result.authorize_url);
+      popup.location.href = authorizeUrlFor(provider, result.authorize_url);
       popupPoll.current = setInterval(() => {
         const outcome = takeOAuthOutcome(provider);
         const timedOut = Date.now() - startedAt > 120000;
@@ -125,7 +128,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
         setConnecting(null);
         const message = googleError(err);
         setError(message.includes("not configured")
-          ? `${name} connection is unavailable because this server has not been configured for Google sign-in. Contact the server administrator.`
+          ? `${name} connection is unavailable because this server has not been configured for ${vendor} sign-in. Contact the server administrator.`
           : message);
       }
     }
@@ -141,13 +144,13 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
 
   const syncing = connection?.sync_status === "syncing";
   const syncIssue = connection?.sync_status === "degraded" || !!resourceError;
-  const syncSummary = syncing ? "Syncing…" : resourceError ? "Folder list unavailable" : syncIssue ? "Sync needs attention" : connection?.stored_items !== undefined ? `${connection.stored_items} items stored` : "Ready to sync";
+  const syncSummary = syncing ? "Syncing…" : resourceError ? `${picker?.singular ?? "Resource"} list unavailable` : syncIssue ? "Sync needs attention" : connection?.stored_items !== undefined ? `${connection.stored_items} items stored` : "Ready to sync";
   const dirty = resources !== undefined && JSON.stringify(selected) !== JSON.stringify(resources.selected);
   const listedIds = new Set(resources?.resources.map((resource) => resource.id));
   // Preserve selected IDs absent from a partial/provider-filtered listing.
   const missingIds = (selected ?? []).filter((id) => !listedIds.has(id));
   const options = [...(resources?.resources ?? []), ...missingIds.map((id) => ({
-    id, name: id, description: "Previously selected; not returned by Google.", selected: true,
+    id, name: id, description: `Previously selected; not returned by ${vendor}.`, selected: true,
   }))];
   const cancelAuthorization = () => {
     if (popupPoll.current) clearInterval(popupPoll.current);
@@ -158,19 +161,19 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
   };
   const close = () => { cancelAuthorization(); setOpened(false); };
   const title = connection?.connected ? `${name} connected` : `Connect ${name}`;
-  const permissions = isDrive
-    ? ["Read files from the folders and shared drives you select", "Keep your imported files searchable in Context Mesh"]
-    : ["Read messages matching the labels you select", "Keep your imported messages searchable in Context Mesh"];
+  // Without a picker the sync covers whatever the provider granted, so it
+  // needs no saved selection first.
+  const syncBlocked = !!picker && (!resources || dirty || selected?.length === 0);
 
   return (
     <>
       <DataSourceCard
         cfg={{
           key: provider, name,
-          description: `Read selected ${resourceName} into your Context Mesh memory.`,
-          initials: isDrive ? "Dr" : "Gm",
-          logo: isDrive ? "googledrive" : "gmail",
-          color: isDrive ? "#4285F4" : "#EA4335",
+          description: cfg.description,
+          initials: cfg.initials,
+          logo: cfg.logo,
+          color: cfg.color,
           permissions: [], supportsChannelRouting: false,
         }}
         state={statusError ? { status: "unavailable" } : connection ? {
@@ -190,7 +193,7 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
       {opened && <ModalShell label={title} width={420} onClose={close}>
         <div style={{ ...CONTENT_STYLE, display: "flex", flexDirection: "column", gap: 16 }}>
         <div className="flex items-center gap-3">
-          <ConnectorLogo logo={isDrive ? "googledrive" : "gmail"} initials={isDrive ? "Dr" : "Gm"} color={isDrive ? "#4285F4" : "#EA4335"} size={38} />
+          <ConnectorLogo logo={cfg.logo} initials={cfg.initials} color={cfg.color} size={38} />
           <h2 className="m-0 flex-1 text-[16px] font-semibold text-[var(--color-cognee-fg,#EDECEA)]">{title}</h2>
           <button onClick={close} aria-label="Close"
             className="cursor-pointer rounded border-none bg-transparent p-0.5 text-[var(--color-cognee-fg,#EDECEA)]/55 transition-colors hover:text-[var(--color-cognee-fg,#EDECEA)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognee-lavender/70"
@@ -207,31 +210,31 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
         ) : <div>
           <p className="m-0 mb-3.5 text-[13px] leading-[1.5] text-[var(--color-cognee-fg,#EDECEA)]/55">Context Mesh will be able to:</p>
           <ul className="m-0 mb-[18px] flex list-none flex-col gap-[7px] p-0">
-            {permissions.map((permission) => <li key={permission} className="relative pl-[18px] text-[13px] text-[var(--color-cognee-fg,#EDECEA)]">
+            {cfg.permissions.map((permission) => <li key={permission} className="relative pl-[18px] text-[13px] text-[var(--color-cognee-fg,#EDECEA)]">
               <span className="absolute left-0 text-[var(--color-cognee-success,#22C55E)]">✓</span>{permission}
             </li>)}
           </ul>
           <button disabled={!!connecting} onClick={() => void connect()}
             className="w-full cursor-pointer rounded-lg border-none bg-cognee-purple py-2.5 text-white transition-colors hover:bg-cognee-purple-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cognee-lavender/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             style={{ fontSize: 13, fontWeight: 600 }}>Continue with {name}</button>
-          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Opens Google’s authorization window — this page stays open</p>
-          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Nothing is imported until you select {resourceName} and sync. Imported content is processed by your configured Context Mesh models.</p>
+          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">Opens {vendor}’s authorization window — this page stays open</p>
+          <p className="m-0 mt-2.5 text-center text-[12px] text-[var(--color-cognee-fg,#EDECEA)]/55">{cfg.importNote}</p>
         </div>) : <Stack gap="md">
-          <Text size="sm" c="dimmed">{connection.account_label ?? "Google account"}</Text>
-          <section aria-label={isDrive ? "Choose folders" : "Choose labels"}>
-            <Text size="sm" fw={600} mb="sm">Choose {isDrive ? "folders" : "labels"}</Text>
+          <Text size="sm" c="dimmed">{connection.account_label ?? cfg.accountFallback}</Text>
+          {picker && <section aria-label={`Choose ${picker.heading}`}>
+            <Text size="sm" fw={600} mb="sm">Choose {picker.heading}</Text>
             {!resources ? (resourceError ? <Button variant="light" onClick={() => void loadResources()}>Retry resource list</Button> : <Loader size="sm" color="#BC9BFF" />) : <Stack gap="sm">
-              <Checkbox label={isDrive ? "Entire My Drive and all shared drives" : "Entire mailbox (all labels)"} checked={selected === null} disabled={busy} onChange={(event) => setSelected(event.currentTarget.checked ? null : [])} />
+              <Checkbox label={picker.allLabel} checked={selected === null} disabled={busy} onChange={(event) => setSelected(event.currentTarget.checked ? null : [])} />
               <div style={{ maxHeight: 180, overflowY: "auto" }}>
                 <Stack gap="xs">
                   {options.map((resource) => <Checkbox key={resource.id} label={resource.name} description={resource.description} disabled={busy || selected === null} checked={selected === null || selected.includes(resource.id)} onChange={(event) => {
                     const checked = event.currentTarget.checked;
                     setSelected((previous) => checked ? [...(previous ?? []), resource.id] : (previous ?? []).filter((id) => id !== resource.id));
                   }} />)}
-                  {!options.length && <Text size="sm" c="dimmed">No {resourceName} found.</Text>}
+                  {!options.length && <Text size="sm" c="dimmed">No {picker.noun} found.</Text>}
                 </Stack>
               </div>
-              {!isDrive && <Text size="xs" c="dimmed">Messages must match all selected labels.</Text>}
+              {picker.hint && <Text size="xs" c="dimmed">{picker.hint}</Text>}
               <Group>
                 <Button disabled={busy || !dirty} onClick={() => void act(async () => {
                   const result = await googleApi.select(provider, selected);
@@ -241,11 +244,11 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
                 })}>Save selection</Button>
               </Group>
             </Stack>}
-          </section>
+          </section>}
           <section aria-label="Sync status" className="border-t border-white/10 pt-3">
             <Group justify="space-between" mb="xs">
               <Text size="sm" fw={600}>Sync status: {syncing ? "Syncing…" : connection.sync_status === "ok" ? "Up to date" : syncIssue ? "Needs attention" : "Not synced"}</Text>
-              <Button disabled={busy || syncing || !resources || dirty || selected?.length === 0} onClick={() => void act(async () => {
+              <Button disabled={busy || syncing || syncBlocked} onClick={() => void act(async () => {
                 const result = await googleApi.sync(provider);
                 if (!result.accepted) throw new Error("The server did not accept the sync request.");
                 await refreshStatus();
@@ -254,11 +257,11 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
             </Group>
             {syncing && <Text size="xs" c="dimmed">Processing in the background. You can close this dialog.</Text>}
             {dirty && <Text size="xs" c="dimmed">Save your selection before refreshing.</Text>}
-            {resources && selected?.length === 0 && <Text size="xs" c="dimmed">Select {resourceName} to start syncing.</Text>}
+            {picker && resources && selected?.length === 0 && <Text size="xs" c="dimmed">Select {picker.noun} to start syncing.</Text>}
             <Text size="xs" c="dimmed">Last sync: {connection.last_synced_at ? new Date(connection.last_synced_at).toLocaleString() : "Never"}</Text>
             {connection.stored_items !== undefined && <Text size="xs" c="dimmed">{connection.stored_items} items stored</Text>}
             {connection.dataset_id && <Link href={`/datasets/${connection.dataset_id}`} className="text-[12px] text-cognee-lavender underline">View in Brain</Link>}
-            {connection.sync_status === "degraded" && <Text c="yellow" size="xs" mt="xs">{connection.sync_counts?.failed_rate_limit ? "Google rate limit reached. Wait a minute, then Refresh." : "Some content could not be processed. Refresh to retry."}</Text>}
+            {connection.sync_status === "degraded" && <Text c="yellow" size="xs" mt="xs">{connection.sync_counts?.failed_rate_limit ? `${vendor} rate limit reached. Wait a minute, then Refresh.` : "Some content could not be processed. Refresh to retry."}</Text>}
             {connection.sync_counts && <details className="mt-2 text-[12px] text-white/55">
               <summary className="cursor-pointer">Sync details</summary>
               <div aria-label="Sync counts" className="mt-2">
@@ -269,14 +272,14 @@ export default function GoogleIntegrationCard({ provider, connecting, setConnect
           </section>
           <section aria-label="Account actions" className="border-t border-white/10 pt-3">
             {connecting === provider ? <Group justify="space-between">
-              <Text size="xs" role="status">Waiting for Google…</Text>
+              <Text size="xs" role="status">Waiting for {vendor}…</Text>
               <Button variant="subtle" onClick={cancelAuthorization}>Cancel</Button>
             </Group> : !confirmDisconnect ? <Group justify="space-between">
               <Button variant="subtle" disabled={!!connecting || busy || syncing} onClick={() => void connect()}>Reconnect</Button>
               <Button color="red" variant="subtle" disabled={busy || syncing} onClick={() => setConfirmDisconnect(true)}>Disconnect</Button>
             </Group> : <Stack gap="sm">
-              <Text size="sm">Disconnect this account? Imported data is kept unless you choose deletion.</Text>
-              <Checkbox label="Also delete this account’s imported Context Mesh dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />
+              <Text size="sm">{cfg.deletableDataset ? "Disconnect this account? Imported data is kept unless you choose deletion." : "Disconnect this account? Imported data is kept."}</Text>
+              {cfg.deletableDataset && <Checkbox label="Also delete this account’s imported Context Mesh dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />}
               <Group>
                 <Button color="red" disabled={busy} onClick={() => void act(async () => {
                   try {
