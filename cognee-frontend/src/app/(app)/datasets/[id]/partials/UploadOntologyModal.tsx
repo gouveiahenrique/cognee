@@ -35,7 +35,7 @@ export default function UploadOntologyModal({
     <ModalShell width={440} onClose={() => { if (!submitting) onClose(); }}>
       <h2 style={{ fontSize: 18, fontWeight: 700, color: "#EDECEA", margin: 0 }}>Upload Ontology</h2>
       <p style={{ fontSize: 13, color: "rgba(237,236,234,0.55)", margin: 0, lineHeight: "20px" }}>
-        Upload an OWL ontology file to guide how Cognee structures your knowledge graph.
+        Upload an OWL ontology file to guide how Context Mesh structures your knowledge graph.
       </p>
       <form onSubmit={handleSubmit}>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

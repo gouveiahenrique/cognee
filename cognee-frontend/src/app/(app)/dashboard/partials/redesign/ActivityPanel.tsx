@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import type { SessionRow } from "@/modules/sessions/getSessions";
 import type { PipelineRun } from "@/ui/elements/AgentActivityTerminal";
 import type { Agent, Dataset } from "@/ui/layout/FilterContext";
+import ActivityTable from "@/modules/activity/ActivityTable";
+import { toActivityRows } from "@/modules/activity/activityRows";
 import { AsciiFrame } from "./AsciiFrame";
 import { FONT, T } from "./mono";
 
-/** Open-source stub — the per-event activity log reveals real workspace
- *  usage and is a Cognee Cloud feature. Renders a text-only notice instead
- *  of syncing the real log. */
+const PREVIEW_ROWS = 8;
 
 interface ActivityPanelProps {
   runs: PipelineRun[];
@@ -19,25 +19,32 @@ interface ActivityPanelProps {
   onViewFullLog?: () => void;
 }
 
-export function ActivityPanel(_props: ActivityPanelProps): React.ReactElement {
+export function ActivityPanel({ runs, agents, datasets, onViewFullLog }: ActivityPanelProps): React.ReactElement {
+  const rows = useMemo(() => {
+    const datasetNames = Object.fromEntries(datasets.map((d) => [d.id, d.name]));
+    const userEmails = Object.fromEntries(agents.map((a) => [a.id, a.email.split("@")[0]]));
+    return toActivityRows(runs, datasetNames, userEmails);
+  }, [runs, agents, datasets]);
+  const costUsd = rows.reduce((sum, r) => sum + (r.costUsd ?? 0), 0);
+
   return (
-    <AsciiFrame label="Activity" minHeight={260}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, textAlign: "center", padding: 20 }}>
-        <span style={{ ...FONT, fontSize: 14, fontWeight: 500, color: T.text }}>
-          Activity is a Cognee Cloud feature
-        </span>
-        <span style={{ ...FONT, fontSize: 13, color: T.muted, maxWidth: 320 }}>
-          Build your own dashboard from the API, or use the hosted one in Cognee Cloud.
-        </span>
-        <a
-          href="https://www.cognee.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ ...FONT, marginTop: 4, background: T.lavender, color: "#000000", borderRadius: 8, padding: "8px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none" }}
+    <AsciiFrame
+      label="Activity"
+      meta={`${rows.length} operations · $${costUsd.toFixed(4)}`}
+      minHeight={260}
+    >
+      <p style={{ ...FONT, margin: "0 0 8px", fontSize: 12, color: T.muted }}>
+        Recent workspace activity, newest first. Cost is estimated from tokens.
+      </p>
+      <ActivityTable rows={rows.slice(0, PREVIEW_ROWS)} />
+      {onViewFullLog && (
+        <button
+          onClick={onViewFullLog}
+          style={{ ...FONT, alignSelf: "flex-start", marginTop: 10, background: "none", border: "none", padding: 0, color: T.lavender, fontSize: 12.5, cursor: "pointer" }}
         >
-          Open Cognee Cloud
-        </a>
-      </div>
+          View full log →{rows.length > PREVIEW_ROWS ? ` (${rows.length - PREVIEW_ROWS} more)` : ""}
+        </button>
+      )}
     </AsciiFrame>
   );
 }

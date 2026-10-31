@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { googleApi } from "@/modules/integrations/googleApi";
+import { googleApi, type SdkProvider } from "@/modules/integrations/googleApi";
 import { stashOAuthOutcome } from "@/modules/integrations/oauthOutcome";
-import GoogleIntegrationCard from "../GoogleIntegrationCard";
+import SdkIntegrationCard from "../SdkIntegrationCard";
 
 jest.mock("@/modules/integrations/googleApi", () => ({
   ...jest.requireActual("@/modules/integrations/googleApi"),
@@ -25,11 +25,11 @@ beforeEach(() => {
   api.disconnect.mockResolvedValue({ disconnected: true });
 });
 
-function Harness({ provider }: { provider: "google_drive" | "gmail" }) {
-  const [connecting, setConnecting] = useState<"google_drive" | "gmail" | null>(null);
-  return <GoogleIntegrationCard provider={provider} connecting={connecting} setConnecting={setConnecting} />;
+function Harness({ provider }: { provider: SdkProvider }) {
+  const [connecting, setConnecting] = useState<SdkProvider | null>(null);
+  return <SdkIntegrationCard provider={provider} connecting={connecting} setConnecting={setConnecting} />;
 }
-function show(provider: "google_drive" | "gmail" = "google_drive") {
+function show(provider: SdkProvider = "google_drive") {
   return render(<MantineProvider><Harness provider={provider} /></MantineProvider>);
 }
 
@@ -84,7 +84,7 @@ test("does not discard selected IDs missing from the listing", async () => {
 test.each([false, true])("disconnect needs confirmation and defaults to retaining data: %s", async (deleteData) => {
   await manage();
   fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
-  const checkbox = screen.getByLabelText("Also delete this account’s imported Cognee dataset");
+  const checkbox = screen.getByLabelText("Also delete this account’s imported Context Mesh dataset");
   expect(checkbox).not.toBeChecked();
   expect(api.disconnect).not.toHaveBeenCalled();
   if (deleteData) fireEvent.click(checkbox);
@@ -213,4 +213,58 @@ test("a stalled reconnect can be cancelled without trapping the dialog", async (
   expect(popup.close).toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Reconnect" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Close" })).toBeEnabled();
+});
+
+test("GitHub has no picker: repositories are chosen on GitHub, and sync needs no selection", async () => {
+  api.connection.mockResolvedValue({ connected: true, account_label: "octo-org", sync_status: "ok", last_synced_at: null });
+  const { container } = show("github");
+  fireEvent.click(await screen.findByRole("button", { name: "Manage GitHub" }));
+  expect(await screen.findByText("octo-org")).toBeInTheDocument();
+  const sections = Array.from(container.querySelectorAll("section")).map(s => s.getAttribute("aria-label"));
+  expect(sections).toEqual(["Sync status", "Account actions"]);
+  expect(api.resources).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+  expect(await screen.findByText(/Sync started/)).toBeInTheDocument();
+  expect(api.sync).toHaveBeenCalledWith("github");
+});
+
+test("GitHub disconnect offers no dataset deletion the backend would refuse", async () => {
+  show("github");
+  fireEvent.click(await screen.findByRole("button", { name: "Manage GitHub" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Disconnect" }));
+  expect(screen.queryByLabelText("Also delete this account’s imported Context Mesh dataset")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Confirm disconnect" }));
+  await waitFor(() => expect(api.disconnect).toHaveBeenCalledWith("github", false));
+});
+
+test("GitHub authorization only navigates the popup to github.com", async () => {
+  api.connection.mockResolvedValue({ connected: false });
+  api.authorize.mockResolvedValue({ authorize_url: "https://accounts.google.com/o/oauth2/auth" });
+  const popup = { closed: false, close: jest.fn(), location: { href: "" } };
+  jest.spyOn(window, "open").mockReturnValueOnce(popup as unknown as Window);
+  show("github");
+  fireEvent.click(await screen.findByRole("button", { name: "Connect GitHub" }));
+  fireEvent.click(screen.getByRole("button", { name: "Continue with GitHub" }));
+  expect(await screen.findByText(/unexpected GitHub authorization URL/)).toBeInTheDocument();
+  expect(popup.location.href).toBe("");
+  expect(popup.close).toHaveBeenCalled();
+});
+
+test("Linear picks teams, all of them by default", async () => {
+  api.resources.mockResolvedValue({ resources: [{ id: "t1", name: "Platform", selected: true }], selected: null });
+  show("linear");
+  fireEvent.click(await screen.findByRole("button", { name: "Manage Linear" }));
+  expect(await screen.findByText("Choose teams")).toBeInTheDocument();
+  expect(screen.getByLabelText("All teams")).toBeChecked();
+  expect(api.resources).toHaveBeenCalledWith("linear");
+});
+
+test("Linear configuration error names Linear sign-in", async () => {
+  api.connection.mockResolvedValue({ connected: false });
+  api.authorize.mockRejectedValue(new Error("linear integration is not configured on this server."));
+  jest.spyOn(window, "open").mockReturnValueOnce({ close: jest.fn() } as unknown as Window);
+  show("linear");
+  fireEvent.click(await screen.findByRole("button", { name: "Connect Linear" }));
+  fireEvent.click(screen.getByRole("button", { name: "Continue with Linear" }));
+  expect(await screen.findByText(/not been configured for Linear sign-in/)).toBeInTheDocument();
 });

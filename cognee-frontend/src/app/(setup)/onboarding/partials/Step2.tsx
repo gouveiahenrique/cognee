@@ -226,7 +226,7 @@ export function Step2({ files, datasetId, onNext, cogniInstance }: {
       <StepBadge step={2} total={3} />
       <h1 style={{ fontSize: 28, fontWeight: 300, color: "#EDECEA", margin: 0, fontFamily: '"TWKLausanne", sans-serif', letterSpacing: "-0.02em" }}>Building your memory</h1>
       <p style={{ fontSize: 15, color: "rgba(237,236,234,0.65)", margin: 0, textAlign: "center", maxWidth: 480, lineHeight: "22px" }}>
-        Cognee is extracting entities, building relationships, and generating embeddings.
+        Context Mesh is extracting entities, building relationships, and generating embeddings.
       </p>
 
       <div style={{ width: 480, maxWidth: "100%", background: "#2a2a2e", border: "1px solid rgba(188,155,255,0.20)", borderRadius: 12, padding: 24 }}>

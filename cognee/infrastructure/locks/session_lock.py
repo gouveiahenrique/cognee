@@ -116,6 +116,12 @@ _improving_sessions: set[str] = set()
 # ``release_or_rerun_improve_lock_many``; a fresh claim clears them, since a
 # new holder starts with a full watermark pass anyway.
 _rerun_requested: set[str] = set()
+# Sessions handed to the holder of a dataset key by session-keyed runs that
+# lost the claim on that dataset only — their own sessions were free, so no
+# holder's rerun pass would cover them. ``dataset key -> {session key: (user,
+# session id)}``. Taken by the holder after it releases
+# (``take_improve_session_handoffs``), which then improves them itself.
+_session_handoffs: dict[str, dict[str, tuple[Any, str]]] = {}
 _improve_registry_lock = asyncio.Lock()
 
 
@@ -177,6 +183,42 @@ async def request_improve_rerun_many(keys: Iterable[str]) -> bool:
             return False
         _rerun_requested.update(held)
         return True
+
+
+async def hand_off_improve_sessions(
+    dataset_key: str, user: Any, session_ids: Iterable[str]
+) -> bool:
+    """Hand ``session_ids`` to the current holder of ``dataset_key``.
+
+    Called by a session-keyed run that lost the claim while none of its own
+    sessions was held — so ``request_improve_rerun_many`` reached nobody, and
+    without this its sessions would wait for an improve that may never come.
+    Returns ``True`` iff ``dataset_key`` is held, i.e. a holder will take the
+    handoff after it releases; ``False`` means the key is free now and the
+    caller should simply claim it again.
+    """
+    sessions = [session_id for session_id in session_ids if session_id]
+    if not dataset_key or not sessions:
+        return False
+    async with _improve_registry_lock:
+        if dataset_key not in _improving_sessions:
+            return False
+        pending = _session_handoffs.setdefault(dataset_key, {})
+        for session_id in sessions:
+            pending[f"session:{getattr(user, 'id', user)}:{session_id}"] = (user, session_id)
+        return True
+
+
+async def take_improve_session_handoffs(dataset_key: str) -> list[tuple[Any, str]]:
+    """Remove and return the ``(user, session id)`` pairs handed to ``dataset_key``.
+
+    The holder calls this after releasing. A handoff can only be recorded while
+    the key is held, so nothing recorded during this hold is missed; one
+    recorded under a later holder may be taken here instead, which is harmless
+    — whoever takes it improves it.
+    """
+    async with _improve_registry_lock:
+        return list(_session_handoffs.pop(dataset_key, {}).values())
 
 
 async def has_pending_improve_rerun(keys: Iterable[str]) -> bool:

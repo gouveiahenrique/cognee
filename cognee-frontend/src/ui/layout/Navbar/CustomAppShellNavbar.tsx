@@ -90,6 +90,30 @@ function KeyIcon({ active }: { active: boolean }) {
   );
 }
 
+function ActivityIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  );
+}
+
+function ChartIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
+function TargetIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={active ? "#BC9BFF" : "rgba(255,255,255,0.5)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" />
+    </svg>
+  );
+}
+
 // -- Navigation data --
 
 // Routes that require the tenant pod — dimmed/locked while it provisions.
@@ -127,6 +151,14 @@ const NAV_SECTIONS: NavSection[] = [
       { text: "Search", link: "/search", icon: SearchIcon },
       { text: "Skills", link: "/skills", icon: SkillsIcon },
       { text: "Mindmap", link: "/knowledge-graph", icon: GraphIcon },
+    ],
+  },
+  {
+    label: "INSIGHTS",
+    items: [
+      { text: "Activity", link: "/activity", icon: ActivityIcon },
+      { text: "Analytics", link: "/analytics", icon: ChartIcon },
+      { text: "Memory Coverage", link: "/memory-gap-analysis", icon: TargetIcon },
     ],
   },
   {
@@ -281,6 +313,9 @@ export default function CustomAppShellNavbar() {
             </svg>
             {!railed && "Give feedback"}
           </button>
+          {/* Booking a call with the cognee team only makes sense on Cognee Cloud;
+              a self-hosted deployment belongs to whoever runs it. */}
+          {isCloudEnvironment() && (
           <Link
             href="https://calendly.com/luca-topoteretes/new-meeting"
             target="_blank"
@@ -316,6 +351,7 @@ export default function CustomAppShellNavbar() {
             </svg>
             {!railed && "Book a call"}
           </Link>
+          )}
           {/* Paid plans and credits are a cloud-only concept, and app/(app)/billing/
               is excluded from the public sync — without this gate the button 404s
               for every self-hosted user. */}

@@ -4,6 +4,7 @@ import ConnectorLogo from "./ConnectorLogo";
 
 import { useState, type ReactElement } from "react";
 import { trackEvent } from "@/modules/analytics";
+import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
 // Mirrors the native integrations offered in Claude Desktop's connector
 // directory, so the false-door list measures demand against a set users already
@@ -44,6 +45,8 @@ const INTEGRATIONS: DataSource[] = [
   { name: "lemlist",      description: "Outreach campaigns",          initials: "Ll", color: "#4F46E5", logo: "lemlist" },
   { name: "Workable",     description: "Candidates and pipelines",    initials: "Wk", color: "#16A34A", logo: "workable" },
 ];
+
+const SDK_LIVE_SOURCES = new Set(["GitHub", "Linear"]);
 
 // These data sources aren't built yet. Each card presents as a real, available
 // connector (no "coming soon" telegraph) so a Connect click measures genuine
@@ -110,12 +113,17 @@ function ComingSoonModal({
 export default function MoreDataSourcesSection(): ReactElement {
   const [activeName, setActiveName] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const activeSource = INTEGRATIONS.find((it) => it.name === activeName) ?? null;
+  // Self-hosted already offers real GitHub and Linear cards (SdkIntegrationsSection),
+  // so a false door for them there would be a second, dead tile.
+  const sources = isCloudEnvironment()
+    ? INTEGRATIONS
+    : INTEGRATIONS.filter((it) => !SDK_LIVE_SOURCES.has(it.name));
+  const activeSource = sources.find((it) => it.name === activeName) ?? null;
 
   const q = query.trim().toLowerCase();
   const filtered = q
-    ? INTEGRATIONS.filter((it) => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q))
-    : INTEGRATIONS;
+    ? sources.filter((it) => it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q))
+    : sources;
 
   function openSource(source: DataSource) {
     trackEvent({

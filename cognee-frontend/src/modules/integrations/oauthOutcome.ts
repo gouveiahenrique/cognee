@@ -112,7 +112,7 @@ export function describeOAuthFailure(outcome: string, providerName: string): str
     case "cancelled":
       return `Authorization was cancelled, so ${providerName} is not connected. You can start again whenever you like.`;
     case "error_already_connected":
-      return `This ${providerName} workspace is already connected to a different Cognee workspace. A ${providerName} workspace can only be connected in one place — disconnect it there first, then connect it here.`;
+      return `This ${providerName} workspace is already connected to a different Context Mesh workspace. A ${providerName} workspace can only be connected in one place — disconnect it there first, then connect it here.`;
     case "error_invalid_state":
       return `The authorization link expired before it was approved. Close this and start again — the link is only valid for a few minutes.`;
     case "error_exchange_failed":

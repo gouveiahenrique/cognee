@@ -78,7 +78,7 @@ export default function LocalSignInForm() {
           Local instance
         </Title>
         <Text size="sm" className="!text-[#EDECEA]/85 !font-light !text-center">
-          Sign in to your local Cognee backend
+          Sign in to your local Context Mesh backend
         </Text>
       </Flex>
 

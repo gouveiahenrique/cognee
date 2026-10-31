@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/modules/users/useCurrentUser";
-import getLocalUser from "@/modules/users/getLocalUser";
-import CogneeUser from "@/modules/users/CogneeUser";
 import isCloudEnvironment from "@/utils/isCloudEnvironment";
 
-import Image from "next/image";
 import Link from "next/link";
 import HelpMenu from "./HelpMenu";
 import ProfileMenu from "./ProfileMenu";
@@ -75,17 +72,11 @@ function PlusIcon() {
 }
 
 export default function TopBar() {
-  const [localUser, setLocalUser] = useState<CogneeUser>();
   const cloud = isCloudEnvironment();
-  const { data: cloudUser } = useCurrentUser(cloud);
-  const user = cloud ? cloudUser : localUser;
+  const { data: user } = useCurrentUser();
   const pathname = usePathname();
   const { workspace, workspaces, setWorkspace } = useFilter();
   const { requestCreateWorkspace, availableTenants } = useTenant();
-
-  useEffect(() => {
-    if (!cloud) getLocalUser().then((u) => { if (u) setLocalUser(u); });
-  }, [cloud]);
 
   // Derive page label
   const basePath = "/" + (pathname.split("/").filter(Boolean)[0] || "");
@@ -100,7 +91,9 @@ export default function TopBar() {
       <div className="flex items-center" style={{ gap: 8 }}>
         {/* Logo fixed-width box so workspace aligns with right edge of navbar (240px - 24px padding) */}
         <div style={{ width: 240, flexShrink: 0, display: "flex", alignItems: "center" }}>
-          <Image src="/cognee-logo-black.svg" alt="Cognee" width={110} height={24} style={{ flexShrink: 0, filter: "invert(1)" }} />
+          <span style={{ flexShrink: 0, fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em", color: "#EDECEA", whiteSpace: "nowrap" }}>
+            Context<span style={{ color: "#BC9BFF" }}>Mesh</span>
+          </span>
         </div>
 
         {/* 1. Workspace switcher */}
@@ -168,6 +161,7 @@ export default function TopBar() {
         <ProfileMenu
           userName={user?.name || ""}
           userEmail={user?.email || ""}
+          membersHref={cloud ? null : "/members"}
           logoutHref={cloud ? "/api/signout" : "/api/local-signout"}
         />
       </div>

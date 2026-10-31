@@ -75,7 +75,7 @@ export function ConnectStatus({ verified }: { verified: boolean }) {
         }}
       />
       <span style={{ color: verified ? "#22C55E" : "rgba(237,236,234,0.5)" }}>
-        {verified ? "Connected — activity detected in Cognee Cloud" : "Waiting for a connection…"}
+        {verified ? "Connected — activity detected in Context Mesh Cloud" : "Waiting for a connection…"}
       </span>
     </div>
   );
@@ -95,7 +95,7 @@ export function buildAgentOnboardingCards(params: {
 
   const credsCard: AgentOnboardingCard = {
     title: "Copy your API credentials",
-    description: "Open a terminal and run these to point your agent at your Cognee memory.",
+    description: "Open a terminal and run these to point your agent at your Context Mesh memory.",
     node: <OnboardingInlineCode code={exportEnvVar(os, "COGNEE_BASE_URL", baseUrl)} toCopy={credsCode} loading={!credsReady} placeholder="Preparing your credentials…" agent={agent} copyTarget="api_credentials" />,
   };
   const allSetCard: AgentOnboardingCard = {
@@ -106,8 +106,8 @@ export function buildAgentOnboardingCards(params: {
         <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 14, borderRadius: 10, background: "rgba(237,236,234,0.04)", border: "1px solid rgba(237,236,234,0.10)" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "#EDECEA" }}>What just happened</div>
           <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: "19px", color: "rgba(237,236,234,0.6)" }}>
-            <li>The Cognee plugin hooks into your agent&apos;s lifecycle — no curl or manual API calls — and captures your session as you work.</li>
-            <li>When a session ends (e.g. you <strong style={{ color: "#EDECEA" }}>exit</strong>), it consolidates that session into your Cognee Cloud knowledge graph.</li>
+            <li>The Context Mesh plugin hooks into your agent&apos;s lifecycle — no curl or manual API calls — and captures your session as you work.</li>
+            <li>When a session ends (e.g. you <strong style={{ color: "#EDECEA" }}>exit</strong>), it consolidates that session into your Context Mesh Cloud knowledge graph.</li>
             <li>On every new session, it automatically recalls your memory back from the cloud.</li>
           </ul>
           <div style={{ fontSize: 13, lineHeight: "19px", color: "rgba(237,236,234,0.6)" }}>
@@ -125,8 +125,8 @@ export function buildAgentOnboardingCards(params: {
     ? [
         credsCard,
         {
-          title: "Install the Cognee plugin",
-          description: "Run these in your terminal one at a time — register the Cognee marketplace, then install the memory plugin.",
+          title: "Install the Context Mesh plugin",
+          description: "Run these in your terminal one at a time — register the Context Mesh marketplace, then install the memory plugin.",
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
               <OnboardingInlineCode code={CLAUDE_MARKETPLACE_ADD} agent={agent} copyTarget="marketplace_add" />
@@ -135,8 +135,8 @@ export function buildAgentOnboardingCards(params: {
           ),
         },
         {
-          title: "Upload something to Cognee",
-          description: "Pick one and paste it into Claude — it stores the content in your Cognee memory so you can recall it in the next step.",
+          title: "Upload something to Context Mesh",
+          description: "Pick one and paste it into Claude — it stores the content in your Context Mesh memory so you can recall it in the next step.",
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
               <div>
@@ -152,10 +152,10 @@ export function buildAgentOnboardingCards(params: {
           ),
         },
         {
-          title: connectVerified ? "Connected — activity detected" : "Recall it from Cognee",
+          title: connectVerified ? "Connected — activity detected" : "Recall it from Context Mesh",
           description: connectVerified
-            ? "We detected your new session in Cognee Cloud — you're connected. You're all set."
-            : "Now ask Claude a question about what you just uploaded — it should answer from Cognee Cloud. (For the sample, use the question below.) This step completes on its own once your session shows up.",
+            ? "We detected your new session in Context Mesh Cloud — you're connected. You're all set."
+            : "Now ask Claude a question about what you just uploaded — it should answer from Context Mesh Cloud. (For the sample, use the question below.) This step completes on its own once your session shows up.",
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
               <div>
@@ -175,8 +175,8 @@ export function buildAgentOnboardingCards(params: {
     : [
         credsCard,
         {
-          title: "Install the Cognee plugin",
-          description: "Run these in your terminal one at a time — enable Codex hooks, register the Cognee marketplace, then install the memory plugin.",
+          title: "Install the Context Mesh plugin",
+          description: "Run these in your terminal one at a time — enable Codex hooks, register the Context Mesh marketplace, then install the memory plugin.",
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
               <OnboardingInlineCode code={CODEX_HOOKS_ENABLE} agent={agent} copyTarget="hooks_enable" />
@@ -186,8 +186,8 @@ export function buildAgentOnboardingCards(params: {
           ),
         },
         {
-          title: "Upload something to Cognee",
-          description: `Pick one and paste it into ${name} — it stores the content in your Cognee memory so you can recall it in the next step.`,
+          title: "Upload something to Context Mesh",
+          description: `Pick one and paste it into ${name} — it stores the content in your Context Mesh memory so you can recall it in the next step.`,
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
               <div>
@@ -203,10 +203,10 @@ export function buildAgentOnboardingCards(params: {
           ),
         },
         {
-          title: connectVerified ? "Connected — activity detected" : "Recall it from Cognee",
+          title: connectVerified ? "Connected — activity detected" : "Recall it from Context Mesh",
           description: connectVerified
-            ? "We detected your new session in Cognee Cloud — you're connected. You're all set."
-            : `Now ask ${name} a question about what you just uploaded — it should answer from Cognee Cloud. (For the sample, use the question below.) This step completes on its own once your session shows up.`,
+            ? "We detected your new session in Context Mesh Cloud — you're connected. You're all set."
+            : `Now ask ${name} a question about what you just uploaded — it should answer from Context Mesh Cloud. (For the sample, use the question below.) This step completes on its own once your session shows up.`,
           node: (
             <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
               <div>

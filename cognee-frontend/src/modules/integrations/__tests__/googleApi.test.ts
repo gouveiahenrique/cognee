@@ -1,5 +1,5 @@
 import fetchMock from "jest-fetch-mock";
-import { googleApi, googleAuthorizeUrl } from "../googleApi";
+import { authorizeUrlFor, googleApi, googleAuthorizeUrl } from "../googleApi";
 
 jest.mock("@/modules/users/getLocalApiUrl", () => ({ getLocalApiUrl: () => "http://localhost:8000" }));
 beforeEach(() => fetchMock.resetMocks());
@@ -51,6 +51,31 @@ test("sync acceptance is not converted into completion", async () => {
 });
 
 test.each(["javascript:alert(1)", "https://accounts.google.com.evil.test/auth", "http://accounts.google.com/auth"])("refuses an unsafe popup URL: %s", (url) => expect(() => googleAuthorizeUrl(url)).toThrow());
+
+test.each([
+  ["github", "https://github.com/apps/cognee/installations/new?state=s"],
+  ["linear", "https://linear.app/oauth/authorize?state=s"],
+] as const)("accepts %s's own authorization origin", (provider, url) => {
+  expect(authorizeUrlFor(provider, url)).toBe(url);
+});
+
+test.each([
+  ["github", "https://github.com.evil.test/apps/x"],
+  ["github", "https://linear.app/oauth/authorize"],
+  ["linear", "https://api.linear.app.evil.test/oauth"],
+  ["linear", "http://linear.app/oauth/authorize"],
+] as const)("refuses a foreign %s popup URL: %s", (provider, url) => {
+  expect(() => authorizeUrlFor(provider, url)).toThrow();
+});
+
+test("GitHub and Linear go through the same per-user SDK routes", async () => {
+  fetchMock.mockResponseOnce(JSON.stringify({ connected: false }));
+  await googleApi.connection("linear");
+  expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/api/v1/integrations/linear/connection", expect.objectContaining({ credentials: "include" }));
+  fetchMock.mockResponseOnce(JSON.stringify({ authorizeUrl: "https://github.com/apps/cognee/installations/new" }));
+  await googleApi.authorize("github");
+  expect(fetchMock).toHaveBeenCalledWith("http://localhost:8000/api/v1/integrations/github/authorize", expect.objectContaining({ method: "POST" }));
+});
 
 test("accepts the official HTTPS Google authorization origin", () => {
   expect(googleAuthorizeUrl("https://accounts.google.com/o/oauth2/v2/auth?state=test")).toContain("state=test");

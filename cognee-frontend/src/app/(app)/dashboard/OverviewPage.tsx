@@ -32,6 +32,8 @@ import type { FlowSource, FlowAgent, NodeStatus } from "./partials/redesign/Memo
 import { CostPanel } from "./partials/redesign/CostPanel";
 import { PerformancePanel } from "./partials/redesign/PerformancePanel";
 import type { TopicScore } from "./partials/redesign/PerformancePanel";
+import { averageScore } from "@/modules/memoryCoverage/coverage";
+import { useDatasetCoverage } from "@/modules/memoryCoverage/useDatasetCoverage";
 import { ActivityPanel } from "./partials/redesign/ActivityPanel";
 import type { DashRange } from "./partials/redesign/RangeToggle";
 import { FONT, T } from "./partials/redesign/mono";
@@ -130,6 +132,7 @@ export default function OverviewPage(): React.ReactElement {
   }, [workspaceReady]);
 
   const { runs, sessions, loading } = useDashboardTelemetry(telemetryRange);
+  const { data: coverageByDataset = {} } = useDatasetCoverage(datasets.map((d) => d.id));
   const { data: hourlyCosts = null } = useTenantHourlyCosts(tenant?.tenant_id ?? null, range);
   const connectedIntegrations = useConnectedIntegrations(sessions, tenant?.tenant_id ?? null);
   const sourceStatuses = useDataSourceStatuses(DATA_SOURCE_PROVIDERS, tenant?.tenant_id ?? null);
@@ -219,10 +222,10 @@ export default function OverviewPage(): React.ReactElement {
   const connectedAgentCount = [...PERSISTENT_AGENT_DEFS, ...DYNAMIC_AGENT_DEFS]
     .filter((d) => hasRegistered(sessions, d.prefixes)).length;
 
-  // Memory Coverage is a Cognee Cloud feature (see PerformancePanel) — no
-  // local score to compute, so the panel gets an empty state directly.
-  const recallPct: number | null = null;
-  const topics: TopicScore[] = [];
+  // Coverage per dataset from its latest analysis; real recall averages the
+  // scored ones (see /memory-gap-analysis).
+  const topics: TopicScore[] = datasets.map((d) => ({ id: d.id, name: d.name, pct: coverageByDataset[d.id]?.score ?? null }));
+  const recallPct = averageScore(Object.values(coverageByDataset));
 
   const greetingName = currentUser?.name?.trim() || (currentUser?.email ? currentUser.email.split("@")[0] : "");
 
@@ -328,7 +331,7 @@ export default function OverviewPage(): React.ReactElement {
             recallPct={recallPct}
             topics={topics}
             onUpload={() => uploadInputRef.current?.click()}
-            onViewAnalysis={() => router.push("/memory-gap-analysis")}
+            onViewAnalysis={(datasetId) => router.push(datasetId ? `/memory-gap-analysis?dataset=${datasetId}` : "/memory-gap-analysis")}
           />
         </div>
 

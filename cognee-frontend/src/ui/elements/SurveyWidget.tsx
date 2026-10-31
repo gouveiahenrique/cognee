@@ -8,7 +8,7 @@ import SurveyScoreStep from "./SurveyScoreStep";
 import SurveyFollowupStep from "./SurveyFollowupStep";
 import SurveyThanksStep from "./SurveyThanksStep";
 
-const SCORE_QUESTION = "How likely are you to recommend Cognee to a colleague?";
+const SCORE_QUESTION = "How likely are you to recommend Context Mesh to a colleague?";
 
 interface SurveyWidgetProps {
   responseId: string;

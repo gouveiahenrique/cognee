@@ -64,7 +64,7 @@ export default function MemoryCustomizationBar({
       <div style={{ display: "flex", gap: 16 }}>
         {/* Graph model dropdown */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={labelStyle}>Graph Model <Tooltip label="Define entity types and relationships to control how Cognee structures your knowledge graph." withArrow multiline w={240} position="top"><span style={{ display: "inline-flex" }}><InfoIcon /></span></Tooltip></span>
+          <span style={labelStyle}>Graph Model <Tooltip label="Define entity types and relationships to control how Context Mesh structures your knowledge graph." withArrow multiline w={240} position="top"><span style={{ display: "inline-flex" }}><InfoIcon /></span></Tooltip></span>
           <Menu shadow="md" width={220} position="bottom-start" withinPortal>
             <Menu.Target>
               <button className="cursor-pointer hover:bg-white/10" style={triggerStyle}>
@@ -102,7 +102,7 @@ export default function MemoryCustomizationBar({
 
         {/* Custom prompt dropdown */}
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={labelStyle}>Prompt <Tooltip label="Custom instructions that guide how Cognee extracts entities and relationships from your data." withArrow multiline w={240} position="top"><span style={{ display: "inline-flex" }}><InfoIcon /></span></Tooltip></span>
+          <span style={labelStyle}>Prompt <Tooltip label="Custom instructions that guide how Context Mesh extracts entities and relationships from your data." withArrow multiline w={240} position="top"><span style={{ display: "inline-flex" }}><InfoIcon /></span></Tooltip></span>
           <Menu shadow="md" width={220} position="bottom-start" withinPortal>
             <Menu.Target>
               <button className="cursor-pointer hover:bg-white/10" style={triggerStyle}>

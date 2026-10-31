@@ -1,40 +1,71 @@
 "use client";
 
 import React from "react";
+import { scoreColor } from "@/modules/memoryCoverage/coverage";
 import { AsciiFrame } from "./AsciiFrame";
-import { FONT, T } from "./mono";
+import { FONT, MONO_FONT, T } from "./mono";
 
-/** Open-source stub — recall/coverage scoring reads the tenant's real brains
- *  and is a Cognee Cloud feature. Renders a text-only notice instead of
- *  syncing the real panel. */
-
-export interface TopicScore { name: string; pct: number | null }
+/** A dataset's coverage score; `pct` is null until it has been analysed. */
+export interface TopicScore { id?: string; name: string; pct: number | null }
 
 interface PerformancePanelProps {
   recallPct: number | null;
   topics: TopicScore[];
   onUpload?: () => void;
-  onViewAnalysis?: () => void;
+  onViewAnalysis?: (datasetId?: string) => void;
 }
 
-export function PerformancePanel(_props: PerformancePanelProps): React.ReactElement {
+const MAX_TOPICS = 4;
+
+export function PerformancePanel({ recallPct, topics, onUpload, onViewAnalysis }: PerformancePanelProps): React.ReactElement {
+  const shown = topics.slice(0, MAX_TOPICS);
+  const anyScored = topics.some((t) => t.pct != null);
+
   return (
-    <AsciiFrame label="Memory Coverage" minHeight={260}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, textAlign: "center", padding: 20 }}>
-        <span style={{ ...FONT, fontSize: 14, fontWeight: 500, color: T.text }}>
-          Memory Coverage is a Cognee Cloud feature
+    <AsciiFrame label="Memory Coverage" meta="LLM-as-judge" minHeight={260}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+        <span style={{ ...MONO_FONT, fontSize: 26, color: scoreColor(recallPct) }}>
+          {recallPct == null ? "—" : `${Math.round(recallPct)}%`}
         </span>
-        <span style={{ ...FONT, fontSize: 13, color: T.muted, maxWidth: 320 }}>
-          Build your own dashboard from the API, or use the hosted one in Cognee Cloud.
-        </span>
-        <a
-          href="https://www.cognee.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ ...FONT, marginTop: 4, background: T.lavender, color: "#000000", borderRadius: 8, padding: "8px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none" }}
-        >
-          Open Cognee Cloud
-        </a>
+        <span style={{ ...FONT, fontSize: 12, color: T.muted }}>real recall</span>
+      </div>
+
+      <div style={{ ...FONT, fontSize: 12, color: T.faint, margin: "12px 0 6px" }}>Coverage by dataset</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {shown.length === 0 ? (
+          <span style={{ ...FONT, fontSize: 13, color: T.faint }}>No datasets yet.</span>
+        ) : shown.map((t) => (
+          <button
+            key={t.id ?? t.name}
+            onClick={() => onViewAnalysis?.(t.id)}
+            style={{ ...FONT, display: "flex", justifyContent: "space-between", background: "none", border: "none", padding: "4px 0", cursor: "pointer", color: T.text, fontSize: 13 }}
+          >
+            <span>{t.name}</span>
+            <span style={{ ...MONO_FONT, color: scoreColor(t.pct) }}>{t.pct == null ? "—" : `${Math.round(t.pct)}%`}</span>
+          </button>
+        ))}
+      </div>
+
+      {!anyScored && shown.length > 0 && (
+        <p style={{ ...FONT, fontSize: 12, color: T.faint, margin: "8px 0 0" }}>Not scored yet. Run an analysis to see coverage per dataset.</p>
+      )}
+      {topics.length > MAX_TOPICS && (
+        <p style={{ ...FONT, fontSize: 12, color: T.faint, margin: "8px 0 0" }}>
+          Showing {MAX_TOPICS} of {topics.length} datasets. Real recall averages every scored dataset.
+        </p>
+      )}
+
+      <div style={{ display: "flex", gap: 16, marginTop: "auto", paddingTop: 12 }}>
+        {onViewAnalysis && (
+          <button onClick={() => onViewAnalysis()} style={{ ...FONT, background: "none", border: "none", padding: 0, color: T.lavender, fontSize: 12.5, cursor: "pointer" }}>
+            View analysis →
+          </button>
+        )}
+        {onUpload && (
+          <button onClick={onUpload} style={{ ...FONT, background: "none", border: "none", padding: 0, color: T.muted, fontSize: 12.5, cursor: "pointer" }}>
+            Upload data
+          </button>
+        )}
       </div>
     </AsciiFrame>
   );

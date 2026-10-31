@@ -99,7 +99,7 @@ export default function WelcomePage() {
             fontFamily: '"TWKLausanne", sans-serif',
           }}
         >
-          Welcome to Cognee Cloud
+          Welcome to Context Mesh Cloud
         </h1>
 
         <p

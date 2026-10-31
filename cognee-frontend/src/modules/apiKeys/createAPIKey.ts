@@ -1,3 +1,5 @@
+import localFetch from "@/modules/instances/localFetch";
+
 export interface CreatedApiKey {
   id: string;
   key: string;
@@ -11,8 +13,23 @@ export type CreateApiKeyResult =
   | { ok: false; error: string; status?: number };
 
 export default async function createApiKey(
-  _options: { name?: string; noRedirectOnAuth?: boolean } = {},
+  options: { name?: string; noRedirectOnAuth?: boolean } = {},
 ): Promise<CreateApiKeyResult> {
-  console.warn("API key creation requires Cognee Cloud.");
-  return { ok: false, error: "API key creation requires Cognee Cloud." };
+  try {
+    const response = await localFetch("/v1/auth/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: options.name }),
+    });
+    const created = await response.json();
+    return {
+      ok: true,
+      key: created?.id && created?.key ? { id: created.id, key: created.key } : null,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Something went wrong",
+    };
+  }
 }

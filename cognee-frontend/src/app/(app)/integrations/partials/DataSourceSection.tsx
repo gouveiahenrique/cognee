@@ -9,7 +9,7 @@ import { describeOAuthFailure, stashOAuthOutcome } from "@/modules/integrations/
 import { DATA_SOURCE_CARDS } from "@/modules/integrations/dataSourceCards";
 import type { TeamConnectorCfg, TeamConnectionState } from "@/modules/integrations/types";
 import DataSourceCard from "./DataSourceCard";
-import GoogleIntegrationsSection from "./GoogleIntegrationsSection";
+import SdkIntegrationsSection from "./SdkIntegrationsSection";
 import ConnectModal from "./ConnectModal";
 import { useConnectorConnect } from "./useConnectorConnect";
 import { useConnectorChannels } from "./useConnectorChannels";
@@ -26,7 +26,9 @@ const SEARCH_INPUT =
 const PROVIDERS = DATA_SOURCE_CARDS.map((c) => c.key);
 
 export default function DataSourceSection(): ReactElement {
-  const showSdkGoogle = !isCloudEnvironment();
+  // Self-hosted: GitHub, Linear and Google connect per user through this
+  // backend's own OAuth routes instead of the cloud control plane.
+  const showSdkConnectors = !isCloudEnvironment();
   const { tenant, isOwner } = useTenant();
   const tenantId = tenant?.tenant_id ?? null;
   const { availableTenants } = useUser();
@@ -155,8 +157,8 @@ export default function DataSourceSection(): ReactElement {
         <div>
           <h2 className="m-0 mb-1 text-[18px] font-bold tracking-[-0.01em] text-[var(--color-cognee-fg,#EDECEA)]">Data sources</h2>
           <p className="m-0 text-[14px] text-[var(--color-cognee-fg,#EDECEA)]/55">
-            {showSdkGoogle
-              ? "Connect your tools to your brains. Slack connects your workspace; Google Drive and Gmail connect your account."
+            {showSdkConnectors
+              ? "Connect your tools to your brains. Slack connects your workspace; GitHub, Linear, Google Drive and Gmail connect your account."
               : "Connect the tools your team already uses to your brains. One connection per workspace, shared with everyone."}
           </p>
         </div>
@@ -190,7 +192,7 @@ export default function DataSourceSection(): ReactElement {
             onRetry={() => retryStatus(cfg.key)}
           />
         ))}
-        {showSdkGoogle && <GoogleIntegrationsSection />}
+        {showSdkConnectors && <SdkIntegrationsSection />}
       </div>
 
       {filteredCards.length === 0 && (

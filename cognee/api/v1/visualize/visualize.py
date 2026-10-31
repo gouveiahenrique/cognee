@@ -535,7 +535,10 @@ def _event_time(event: dict[str, Any]) -> datetime | None:
     if not raw:
         return None
     try:
-        return datetime.fromisoformat(raw)
+        # Not every event is a naive SessionQAEntry time: improve and trace
+        # events from the Postgres cache carry an offset. Normalize both sides
+        # so the cutoff comparison never mixes naive and aware datetimes.
+        return _as_naive_utc(datetime.fromisoformat(str(raw)))
     except ValueError:
         return None
 
