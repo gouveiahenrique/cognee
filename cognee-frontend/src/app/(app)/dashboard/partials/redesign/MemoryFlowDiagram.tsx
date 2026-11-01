@@ -75,10 +75,10 @@ export function MemoryFlowDiagram(_props: MemoryFlowDiagramProps): React.ReactEl
         }}
       >
         <span style={{ ...FONT, fontSize: 14, fontWeight: 500, color: T.text }}>
-          Live memory graph is a Context Mesh Cloud feature
+          Live memory graph is a Cognee Cloud feature
         </span>
         <span style={{ ...FONT, fontSize: 13, color: T.muted, maxWidth: 360 }}>
-          Build your own dashboard from the API, or use the hosted one in Context Mesh Cloud.
+          Build your own dashboard from the API, or use the hosted one in Cognee Cloud.
         </span>
         <a
           href="https://www.cognee.ai"
@@ -96,7 +96,7 @@ export function MemoryFlowDiagram(_props: MemoryFlowDiagramProps): React.ReactEl
             textDecoration: "none",
           }}
         >
-          Open Context Mesh Cloud
+          Open Cognee Cloud
         </a>
       </div>
     </div>

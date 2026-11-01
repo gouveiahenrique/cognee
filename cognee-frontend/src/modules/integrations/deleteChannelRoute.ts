@@ -6,7 +6,7 @@ export interface DeleteChannelRouteResult {
 }
 
 const UNAVAILABLE =
-  "Channel routing needs Context Mesh Cloud, so there is no route to remove here.";
+  "Channel routing needs Cognee Cloud, so there is no route to remove here.";
 
 /** Open-source stub — see getChannelRoutes.ts. */
 export default async function deleteChannelRoute(

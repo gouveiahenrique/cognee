@@ -208,7 +208,7 @@ export default function SdkIntegrationCard({ provider, connecting, setConnecting
             <Loader size={14} color="#BC9BFF" />Waiting for authorization in the {name} window…
           </p>
         ) : <div>
-          <p className="m-0 mb-3.5 text-[13px] leading-[1.5] text-[var(--color-cognee-fg,#EDECEA)]/55">Context Mesh will be able to:</p>
+          <p className="m-0 mb-3.5 text-[13px] leading-[1.5] text-[var(--color-cognee-fg,#EDECEA)]/55">Cognee will be able to:</p>
           <ul className="m-0 mb-[18px] flex list-none flex-col gap-[7px] p-0">
             {cfg.permissions.map((permission) => <li key={permission} className="relative pl-[18px] text-[13px] text-[var(--color-cognee-fg,#EDECEA)]">
               <span className="absolute left-0 text-[var(--color-cognee-success,#22C55E)]">✓</span>{permission}
@@ -279,7 +279,7 @@ export default function SdkIntegrationCard({ provider, connecting, setConnecting
               <Button color="red" variant="subtle" disabled={busy || syncing} onClick={() => setConfirmDisconnect(true)}>Disconnect</Button>
             </Group> : <Stack gap="sm">
               <Text size="sm">{cfg.deletableDataset ? "Disconnect this account? Imported data is kept unless you choose deletion." : "Disconnect this account? Imported data is kept."}</Text>
-              {cfg.deletableDataset && <Checkbox label="Also delete this account’s imported Context Mesh dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />}
+              {cfg.deletableDataset && <Checkbox label="Also delete this account’s imported Cognee dataset" checked={deleteData} disabled={busy} onChange={(event) => setDeleteData(event.currentTarget.checked)} />}
               <Group>
                 <Button color="red" disabled={busy} onClick={() => void act(async () => {
                   try {

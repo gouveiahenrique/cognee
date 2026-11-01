@@ -12,7 +12,7 @@ export function imgIcon(src: string, alt: string) {
 export function credStep(baseUrl: string, apiKey: string, loading: boolean) {
   return {
     title: "Set your API credentials",
-    description: "Open a terminal and run these commands to configure your Context Mesh endpoint and key.",
+    description: "Open a terminal and run these commands to configure your Cognee endpoint and key.",
     code: `export COGNEE_BASE_URL="${baseUrl}"`,
     codeToCopy: `export COGNEE_BASE_URL="${baseUrl}"\nexport COGNEE_API_KEY="${apiKey}"`,
     loading,

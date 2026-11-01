@@ -29,7 +29,7 @@ export default function CreateModelModal({
       ) : (
         <>
           <p style={{ fontSize: 13, color: "rgba(237,236,234,0.55)", margin: 0, lineHeight: "20px" }}>
-            Would you like to infer a graph model from your existing data? Context Mesh will analyze your files and suggest entity types and relationships.
+            Would you like to infer a graph model from your existing data? Cognee will analyze your files and suggest entity types and relationships.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <button

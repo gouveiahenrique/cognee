@@ -6,7 +6,7 @@ export interface StartConnectionResult {
 }
 
 const UNAVAILABLE =
-  "Connecting a shared data source needs Context Mesh Cloud — it authorizes the workspace through the hosted control plane, which a self-hosted install does not run.";
+  "Connecting a shared data source needs Cognee Cloud — it authorizes the workspace through the hosted control plane, which a self-hosted install does not run.";
 
 /**
  * Open-source stub — team-scoped OAuth is brokered by the cloud control

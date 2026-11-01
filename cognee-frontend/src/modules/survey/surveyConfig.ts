@@ -47,7 +47,7 @@ export const FOLLOWUP_QUESTIONS: Record<ScoreBucket, FollowupQuestion> = {
   },
   promoter: {
     id: "what_valued",
-    question: "What do you value most about Context Mesh?",
+    question: "What do you value most about Cognee?",
     showQuoteConsent: true,
   },
 };

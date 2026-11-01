@@ -84,7 +84,7 @@ test("does not discard selected IDs missing from the listing", async () => {
 test.each([false, true])("disconnect needs confirmation and defaults to retaining data: %s", async (deleteData) => {
   await manage();
   fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
-  const checkbox = screen.getByLabelText("Also delete this account’s imported Context Mesh dataset");
+  const checkbox = screen.getByLabelText("Also delete this account’s imported Cognee dataset");
   expect(checkbox).not.toBeChecked();
   expect(api.disconnect).not.toHaveBeenCalled();
   if (deleteData) fireEvent.click(checkbox);
@@ -232,7 +232,7 @@ test("GitHub disconnect offers no dataset deletion the backend would refuse", as
   show("github");
   fireEvent.click(await screen.findByRole("button", { name: "Manage GitHub" }));
   fireEvent.click(await screen.findByRole("button", { name: "Disconnect" }));
-  expect(screen.queryByLabelText("Also delete this account’s imported Context Mesh dataset")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Also delete this account’s imported Cognee dataset")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Confirm disconnect" }));
   await waitFor(() => expect(api.disconnect).toHaveBeenCalledWith("github", false));
 });

@@ -30,7 +30,7 @@ export default function CreatePromptModal({
       ) : (
         <>
           <p style={{ fontSize: 13, color: "rgba(237,236,234,0.55)", margin: 0, lineHeight: "20px" }}>
-            A custom prompt guides how Context Mesh extracts entities and relationships from your data.
+            A custom prompt guides how Cognee extracts entities and relationships from your data.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <button

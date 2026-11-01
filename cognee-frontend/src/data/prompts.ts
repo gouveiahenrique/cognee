@@ -7,11 +7,11 @@
 import { writeSkillFile } from "@/utils/osCommands";
 import type { PreferredOs } from "@/ui/layout/OsPreferenceContext";
 
-export const CLAUDE_PROMPT = `You are connected to Context Mesh Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
+export const CLAUDE_PROMPT = `You are connected to Cognee Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
 
 ## First — is memory already automatic here?
 
-If the Context Mesh Claude Code plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If the Cognee Claude Code plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools (e.g. cognee-search / cognee-remember) only for an explicit deep search or a "remember this permanently" request.
 
@@ -19,17 +19,17 @@ The HTTP API instructions below are the fallback for when you have neither a plu
 
 ## Connection
 
-Your Context Mesh credentials are available as environment variables:
+Your Cognee credentials are available as environment variables:
 - \`$COGNEE_BASE_URL\` — your tenant API endpoint
 - \`$COGNEE_API_KEY\` — your API key
 
 **If these variables are not set**, ask the user to either:
-1. Open a new terminal and run the export commands from the Context Mesh Cloud console (Connect to Claude → Step 1), or
+1. Open a new terminal and run the export commands from the Cognee Cloud console (Connect to Claude → Step 1), or
 2. Provide the values directly so you can use them inline
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (a fixed prefix "cc_" plus a unix timestamp, e.g. "cc_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (a fixed prefix "cc_" plus a unix timestamp, e.g. "cc_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## How to Use
 
@@ -72,18 +72,18 @@ Headers: X-Api-Key: $COGNEE_API_KEY
 \`\`\`
 
 ## Behavior Guidelines
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
 2. Verify that $COGNEE_BASE_URL and $COGNEE_API_KEY are available; if not, prompt the user. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call.
 3. Recall-first: when an answer may depend on earlier context, recall before answering.
 4. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with your session_id); use /remember (file upload, no session_id) only when the user explicitly asks to write to the graph.
 5. Keep memory operations quiet — don't narrate routine recalls or saves.
 6. Use the default_dataset unless the user specifies otherwise`;
 
-export const CODEX_PROMPT = `You are connected to Context Mesh Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
+export const CODEX_PROMPT = `You are connected to Cognee Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
 
 ## First — is memory already automatic here?
 
-If the Context Mesh Codex plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If the Cognee Codex plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools (e.g. cognee-search / cognee-remember) only for an explicit deep search or a "remember this permanently" request.
 
@@ -91,17 +91,17 @@ The HTTP API instructions below are the fallback for when you have neither a plu
 
 ## Connection
 
-Your Context Mesh credentials are available as environment variables:
+Your Cognee credentials are available as environment variables:
 - \`$COGNEE_BASE_URL\` — your tenant API endpoint
 - \`$COGNEE_API_KEY\` — your API key
 
 **If these variables are not set**, ask the user to either:
-1. Open a new terminal and run the export commands from the Context Mesh Cloud console (Connect to Codex → Step 1), or
+1. Open a new terminal and run the export commands from the Cognee Cloud console (Connect to Codex → Step 1), or
 2. Provide the values directly so you can use them inline
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (a fixed prefix "codex_" plus a unix timestamp, e.g. "codex_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (a fixed prefix "codex_" plus a unix timestamp, e.g. "codex_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## How to Use
 
@@ -143,18 +143,18 @@ curl -s "$COGNEE_BASE_URL/api/v1/datasets/?session_id=<session-id>" -H "X-Api-Ke
 \`\`\`
 
 ## Behavior Guidelines
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
 2. Verify that $COGNEE_BASE_URL and $COGNEE_API_KEY are available; if not, prompt the user. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call.
 3. Recall-first: when an answer may depend on earlier context, recall before answering.
 4. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with your session_id); use /remember (file upload, no session_id) only when the user explicitly asks to write to the graph.
 5. Keep memory operations quiet — don't narrate routine recalls or saves.
 6. Use the default_dataset unless the user specifies otherwise`;
 
-export const OPENCLAW_PROMPT = `You are connected to Context Mesh Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
+export const OPENCLAW_PROMPT = `You are connected to Cognee Cloud, a persistent knowledge graph memory system. Use it to store and retrieve knowledge across conversations.
 
 ## First — is memory already automatic here?
 
-If a Context Mesh plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If a Cognee plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools only for an explicit deep search or a "remember this permanently" request.
 
@@ -162,7 +162,7 @@ The HTTP API instructions below are the fallback for when you have neither a plu
 
 ## Connection
 
-Your Context Mesh credentials are available as environment variables:
+Your Cognee credentials are available as environment variables:
 - \`$COGNEE_BASE_URL\` — your tenant API endpoint
 - \`$COGNEE_API_KEY\` — your API key
 
@@ -172,11 +172,11 @@ Your Context Mesh credentials are available as environment variables:
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (your agent name + a unix timestamp) and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (your agent name + a unix timestamp) and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## Skills
 
-Use the Context Mesh REST API from any skill or conversation:
+Use the Cognee REST API from any skill or conversation:
 
 ### Store knowledge (remember)
 \`\`\`bash
@@ -209,35 +209,35 @@ curl -X POST $COGNEE_BASE_URL/api/v1/recall \\
 The query is auto-routed to a search strategy by default. For targeted retrieval, add "search_type" to the recall body — one of: HYBRID_COMPLETION, GRAPH_COMPLETION, CHUNKS, GRAPH_SUMMARY_COMPLETION.
 
 ## Behavior Guidelines
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The rest applies only to the HTTP-API fallback.
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The rest applies only to the HTTP-API fallback.
 2. Verify that $COGNEE_BASE_URL and $COGNEE_API_KEY are available; if not, prompt the user. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call.
 3. Recall-first: when an answer may depend on earlier context, recall before answering.
 4. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with session_id); use /remember (file upload, no session_id) only when the user explicitly asks.
 5. Use the default_dataset unless the user specifies otherwise`;
 
-export const SKILLS_CONTENT = `# Context Mesh Cloud Memory Skill
+export const SKILLS_CONTENT = `# Cognee Cloud Memory Skill
 
-This skill connects Claude Code to Context Mesh Cloud for persistent knowledge graph memory.
+This skill connects Claude Code to Cognee Cloud for persistent knowledge graph memory.
 
 ## First — is memory already automatic here?
 
-If the Context Mesh Claude Code plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If the Cognee Claude Code plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools (e.g. cognee-search / cognee-remember) only for an explicit deep search or a "remember this permanently" request.
 
 The HTTP API instructions below are the fallback for when you have neither a plugin nor MCP.
 
 ## Prerequisites
-- Context Mesh Cloud account with API key
+- Cognee Cloud account with API key
 - Environment variables set:
   - \`COGNEE_BASE_URL\` — your tenant API endpoint
   - \`COGNEE_API_KEY\` — your API key
 
 **If these variables are not set**, ask the user to run the export commands from the Cognee Cloud console (Connect to Claude Code → Step 1).
 
-## ALWAYS ping Context Mesh Cloud first
+## ALWAYS ping Cognee Cloud first
 
-Before any other operation in the conversation, ping Context Mesh Cloud to confirm the env vars are valid and the tenant is reachable. If the ping fails (non-200, network error, or auth error), tell the user immediately and ask them to re-export the credentials from the Context Mesh Cloud console — do NOT proceed with remember/recall calls against a broken connection.
+Before any other operation in the conversation, ping Cognee Cloud to confirm the env vars are valid and the tenant is reachable. If the ping fails (non-200, network error, or auth error), tell the user immediately and ask them to re-export the credentials from the Cognee Cloud console — do NOT proceed with remember/recall calls against a broken connection.
 
 \`\`\`bash
 curl -fsS -o /dev/null -w "%{http_code}" \\
@@ -248,7 +248,7 @@ A \`200\` means the connection works. A \`401\` means the API key is wrong; \`40
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (a fixed prefix "cc_" plus a unix timestamp, e.g. "cc_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (a fixed prefix "cc_" plus a unix timestamp, e.g. "cc_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## Operations
 
@@ -290,10 +290,10 @@ curl -s "$COGNEE_BASE_URL/api/v1/datasets/?session_id=<session-id>" -H "X-Api-Ke
 \`\`\`
 
 ## Behavior
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
 2. At session start, verify COGNEE_BASE_URL and COGNEE_API_KEY are set; if not, ask the user to export them
-3. **Ping Context Mesh Cloud** with the curl above before any other operation. If it doesn't return 200, surface the failure to the user and stop — do not proceed with broken credentials
-4. Use one session id for the conversation (your agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Context Mesh Cloud dashboard under Sessions and is converted into long-term memory
+3. **Ping Cognee Cloud** with the curl above before any other operation. If it doesn't return 200, surface the failure to the user and stop — do not proceed with broken credentials
+4. Use one session id for the conversation (your agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Cognee Cloud dashboard under Sessions and is converted into long-term memory
 5. Recall-first: when an answer may depend on earlier context, recall before answering
 6. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with your session_id); use /remember (file upload, no session_id) only when the user explicitly asks to write to the graph
 7. Keep memory operations quiet — don't narrate routine recalls or saves
@@ -304,20 +304,20 @@ curl -s "$COGNEE_BASE_URL/api/v1/datasets/?session_id=<session-id>" -H "X-Api-Ke
 // clipboard-only — nothing is sent to our servers; the user pastes and
 // runs the command in their own local terminal.
 
-export const CODEX_SKILLS_CONTENT = `# Context Mesh Cloud Memory Skill
+export const CODEX_SKILLS_CONTENT = `# Cognee Cloud Memory Skill
 
-This skill connects Codex to Context Mesh Cloud for persistent knowledge graph memory.
+This skill connects Codex to Cognee Cloud for persistent knowledge graph memory.
 
 ## First — is memory already automatic here?
 
-If the Context Mesh Codex plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If the Cognee Codex plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools (e.g. cognee-search / cognee-remember) only for an explicit deep search or a "remember this permanently" request.
 
 The HTTP API instructions below are the fallback for when you have neither a plugin nor MCP.
 
 ## Prerequisites
-- Context Mesh Cloud account with API key
+- Cognee Cloud account with API key
 - Environment variables set:
   - \`COGNEE_BASE_URL\` — your tenant API endpoint
   - \`COGNEE_API_KEY\` — your API key
@@ -326,7 +326,7 @@ The HTTP API instructions below are the fallback for when you have neither a plu
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (a fixed prefix "codex_" plus a unix timestamp, e.g. "codex_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (a fixed prefix "codex_" plus a unix timestamp, e.g. "codex_1719320000") and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## Operations
 
@@ -368,27 +368,27 @@ curl -s "$COGNEE_BASE_URL/api/v1/datasets/?session_id=<session-id>" -H "X-Api-Ke
 \`\`\`
 
 ## Behavior
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
-2. At session start, verify COGNEE_BASE_URL and COGNEE_API_KEY are set; if not, ask the user to export them. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Context Mesh Cloud dashboard under Sessions and is converted into long-term memory
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
+2. At session start, verify COGNEE_BASE_URL and COGNEE_API_KEY are set; if not, ask the user to export them. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Cognee Cloud dashboard under Sessions and is converted into long-term memory
 3. Recall-first: when an answer may depend on earlier context, recall before answering
 4. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with your session_id); use /remember (file upload, no session_id) only when the user explicitly asks to write to the graph
 5. Keep memory operations quiet — don't narrate routine recalls or saves
 6. Use default_dataset unless specified otherwise`;
 
-export const OPENCLAW_SKILLS_CONTENT = `# Context Mesh Cloud Memory Skill
+export const OPENCLAW_SKILLS_CONTENT = `# Cognee Cloud Memory Skill
 
-This skill connects OpenClaw to Context Mesh Cloud for persistent knowledge graph memory.
+This skill connects OpenClaw to Cognee Cloud for persistent knowledge graph memory.
 
 ## First — is memory already automatic here?
 
-If a Context Mesh plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
+If a Cognee plugin or an MCP server is installed, memory works on its own: relevant context is recalled into your prompt each turn, and your turns are captured and converted to long-term memory for you. When that is the case:
 - Do NOT call the HTTP API manually (no curl), and do NOT narrate routine recalls/saves.
 - Use the provided memory skills/tools only for an explicit deep search or a "remember this permanently" request.
 
 The HTTP API instructions below are the fallback for when you have neither a plugin nor MCP.
 
 ## Prerequisites
-- Context Mesh Cloud account with API key
+- Cognee Cloud account with API key
 - Environment variables set:
   - \`COGNEE_BASE_URL\` — your tenant API endpoint
   - \`COGNEE_API_KEY\` — your API key
@@ -397,7 +397,7 @@ The HTTP API instructions below are the fallback for when you have neither a plu
 
 ## Session ID — ALWAYS use one
 
-At the start of the conversation, generate ONE id (your agent name + a unix timestamp) and reuse it as \`session_id\` in every call. Sessions group your activity in the Context Mesh Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
+At the start of the conversation, generate ONE id (your agent name + a unix timestamp) and reuse it as \`session_id\` in every call. Sessions group your activity in the Cognee Cloud dashboard and are converted into long-term memory. The ONLY exception: when the user explicitly asks you to store something directly in the knowledge graph, call /remember without a session_id.
 
 ## Operations
 
@@ -439,8 +439,8 @@ curl -s "$COGNEE_BASE_URL/api/v1/datasets/?session_id=<session-id>" -H "X-Api-Ke
 \`\`\`
 
 ## Behavior
-1. If a Context Mesh plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
-2. At session start, verify COGNEE_BASE_URL and COGNEE_API_KEY are set; if not, ask the user to export them. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Context Mesh Cloud dashboard under Sessions and is converted into long-term memory
+1. If a Cognee plugin or MCP server is active, memory is automatic — do NOT call the API manually, and do NOT narrate routine recalls/saves. The remaining guidelines apply only to the HTTP-API fallback.
+2. At session start, verify COGNEE_BASE_URL and COGNEE_API_KEY are set; if not, ask the user to export them. Use one session id (agent name + a unix timestamp) as the \`session_id\` in every call — the session appears automatically in the Cognee Cloud dashboard under Sessions and is converted into long-term memory
 3. Recall-first: when an answer may depend on earlier context, recall before answering
 4. You do NOT need to store after every turn — the session is captured and converted to long-term memory automatically. Store explicitly only for durable facts worth keeping (via /remember/entry with your session_id); use /remember (file upload, no session_id) only when the user explicitly asks to write to the graph
 5. Keep memory operations quiet — don't narrate routine recalls or saves
@@ -469,7 +469,7 @@ export const CODEX_PLUGIN_INSTALL = "codex plugin add cognee@cognee";
 // prompt must not mention them; it only states WHAT to store, the category,
 // and the dataset.
 export const UPLOAD_MEMORY_PROMPT =
-  "Bring my existing memory into Context Mesh as permanent long-term memory. Gather what you already know about me and my work — my CLAUDE.md / AGENTS.md, project notes, and durable facts from our past conversations — and store it with the cognee-remember skill in the \"agent_sessions\" dataset: facts about me, my preferences and how I like to work as category \"user\"; project and codebase knowledge as category \"project\". Group related facts into a few substantial remember calls rather than many tiny ones, and give me a short summary of what you stored. The Context Mesh plugin handles sessions automatically — you don't need a session id or any manual API call.";
+  "Bring my existing memory into Cognee as permanent long-term memory. Gather what you already know about me and my work — my CLAUDE.md / AGENTS.md, project notes, and durable facts from our past conversations — and store it with the cognee-remember skill in the \"agent_sessions\" dataset: facts about me, my preferences and how I like to work as category \"user\"; project and codebase knowledge as category \"project\". Group related facts into a few substantial remember calls rather than many tiny ones, and give me a short summary of what you stored. The Cognee plugin handles sessions automatically — you don't need a session id or any manual API call.";
 
 // Onboarding Option B: the sample text the user pastes to their agent to store
 // in Cognee, giving them something concrete to recall in the next step.
@@ -497,12 +497,12 @@ export function openclawSkillInstall(os: PreferredOs): string {
 // wording or install location.
 export const GENERIC_SKILL_CONTENT = SKILLS_CONTENT
   .replace(
-    "This skill connects Claude Code to Context Mesh Cloud for persistent knowledge graph memory.",
-    "This skill connects your AI agent to Context Mesh Cloud for persistent knowledge graph memory.",
+    "This skill connects Claude Code to Cognee Cloud for persistent knowledge graph memory.",
+    "This skill connects your AI agent to Cognee Cloud for persistent knowledge graph memory.",
   )
   .replace(
-    "ask the user to run the export commands from the Context Mesh Cloud console (Connect to Claude Code → Step 1).",
-    "ask the user to run the export commands from the Context Mesh Cloud console (Integrations → API / MCP → Step 1).",
+    "ask the user to run the export commands from the Cognee Cloud console (Connect to Claude Code → Step 1).",
+    "ask the user to run the export commands from the Cognee Cloud console (Integrations → API / MCP → Step 1).",
   )
   // The base (Claude Code) skill pins the session_id to a "claude-code-" prefix
   // for per-integration detection; a generic API/MCP integration has no fixed

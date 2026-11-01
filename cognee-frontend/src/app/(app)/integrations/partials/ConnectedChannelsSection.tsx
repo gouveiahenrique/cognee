@@ -184,7 +184,7 @@ export default function ConnectedChannelsSection({
         <p className="m-0 text-[12px] leading-[1.45] text-[var(--color-cognee-danger-fg,#FF8A8A)]">{data.error}</p>
       ) : data.channels.length === 0 ? (
         <p className="m-0 text-[12px] leading-[1.45] text-[var(--color-cognee-warning,#F59E0B)]">
-          Context Mesh isn&apos;t in any channel yet. Invite it to one in {providerName}, then hit
+          Cognee isn&apos;t in any channel yet. Invite it to one in {providerName}, then hit
           Refresh.
         </p>
       ) : !isOwner ? (

@@ -14,12 +14,12 @@ interface GuideSection {
 // any of them is worse than no guide.
 const SECTIONS: GuideSection[] = [
   {
-    title: "What Context Mesh reads",
+    title: "What Cognee reads",
     body: (
       <>
         Messages and threads from the channels it has been switched on for, and nothing else.
         Switching a channel on also reads the history it already has, not just new messages.
-        Private channels are only available once you invite Context Mesh into them; it cannot see a
+        Private channels are only available once you invite Cognee into them; it cannot see a
         private channel it is not a member of.
       </>
     ),
@@ -54,7 +54,7 @@ const SECTIONS: GuideSection[] = [
     title: "Who can ask it",
     body: (
       <>
-        Anyone in this Context Mesh workspace. That is the part worth pausing on before switching a
+        Anyone in this Cognee workspace. That is the part worth pausing on before switching a
         channel on: a message in that channel becomes answerable for every member, so treat
         switching on <code className={CODE}>#hr</code> or{" "}
         <code className={CODE}>#compensation</code> as publishing it to the whole team.
@@ -76,12 +76,12 @@ const SECTIONS: GuideSection[] = [
     title: "Remembering one specific thing",
     body: (
       <>
-        Pick <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">Remember in Context Mesh</strong> from a
+        Pick <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">Remember in Cognee</strong> from a
         message&apos;s ⋯ menu to keep that message deliberately, rather than relying on it being
         swept up with the rest of the channel. It gets a ✅ so the channel can see what is being
         kept. <code className={CODE}>/cognee-remember</code> does the same for something Slack
         never saw — a decision from a call, say. <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">
-          Forget in Context Mesh
+          Forget in Cognee
         </strong>{" "}
         removes it again, and the ✅ comes off.
       </>
@@ -91,7 +91,7 @@ const SECTIONS: GuideSection[] = [
     title: "Switching a channel off",
     body: (
       <>
-        Remove Context Mesh from the channel, or untick it on the Integrations page. Either stops it
+        Remove Cognee from the channel, or untick it on the Integrations page. Either stops it
         reading anything new. What was already read stays searchable: entities pulled out of those
         messages may be referenced by other memory, so removing them is not a clean undo.
       </>
@@ -112,7 +112,7 @@ const SECTIONS: GuideSection[] = [
     title: "Who is in control",
     body: (
       <>
-        One Slack workspace connects to one Context Mesh workspace, and only the Context Mesh workspace owner
+        One Slack workspace connects to one Cognee workspace, and only the Cognee workspace owner
         can connect or disconnect it. Channels are different:{" "}
         <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">
           anyone in Slack who can invite the bot into a channel can switch that channel on
@@ -136,7 +136,7 @@ export default function SlackGuide(): ReactElement {
             How Slack memory works
           </h1>
           <p className="m-0 text-[14px] text-[var(--color-cognee-fg,#EDECEA)]/55">
-            What Context Mesh reads from Slack, where it goes, and how to ask it questions.
+            What Cognee reads from Slack, where it goes, and how to ask it questions.
           </p>
         </div>
 

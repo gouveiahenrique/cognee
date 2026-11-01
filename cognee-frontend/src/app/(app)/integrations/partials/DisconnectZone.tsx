@@ -59,7 +59,7 @@ export default function DisconnectZone({ name, provider, onDisconnect }: Disconn
     <div className="mt-4 border-t border-white/10 pt-3.5">
       <p className="m-0 mb-2.5 text-[13px] leading-[1.45] text-[var(--color-cognee-fg,#EDECEA)]/55">
         Disconnect <strong className="font-semibold text-[var(--color-cognee-fg,#EDECEA)]">{name}</strong>? New messages stop syncing. What
-        Context Mesh already learned from this workspace stays in memory.
+        Cognee already learned from this workspace stays in memory.
       </p>
       <div className="flex justify-end gap-2">
         <button

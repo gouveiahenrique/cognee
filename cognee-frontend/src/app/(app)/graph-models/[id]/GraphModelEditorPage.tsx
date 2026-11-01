@@ -149,7 +149,7 @@ export default function GraphModelEditorPage({ modelId }: GraphModelEditorPagePr
   // ── Save to backend config ──────────────────────────────────────────────────
   async function handleSave() {
     if (!cogniInstance) {
-      notifications.show({ title: "Not connected", message: "Connect to a Context Mesh instance to save.", color: "yellow" });
+      notifications.show({ title: "Not connected", message: "Connect to a Cognee instance to save.", color: "yellow" });
       return;
     }
 
@@ -189,7 +189,7 @@ export default function GraphModelEditorPage({ modelId }: GraphModelEditorPagePr
   // ── Regenerate schema via LLM ───────────────────────────────────────────────
   async function openRegenerateModal() {
     if (!cogniInstance) {
-      notifications.show({ title: "Not connected", message: "Connect to a Context Mesh instance first.", color: "yellow" });
+      notifications.show({ title: "Not connected", message: "Connect to a Cognee instance first.", color: "yellow" });
       return;
     }
     setShowRegenerateModal(true);
@@ -645,7 +645,7 @@ export default function GraphModelEditorPage({ modelId }: GraphModelEditorPagePr
           <div onClick={(e) => e.stopPropagation()} style={{ background: "rgba(15,15,15,0.92)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24, width: 480, maxHeight: "80vh", display: "flex", flexDirection: "column", gap: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#EDECEA", margin: 0 }}>Regenerate Schema</h2>
             <p style={{ fontSize: 13, color: "rgba(237,236,234,0.55)", margin: 0, lineHeight: "20px" }}>
-              Select a dataset and files to analyze. Context Mesh will infer entity types and relationships from the selected files.
+              Select a dataset and files to analyze. Cognee will infer entity types and relationships from the selected files.
             </p>
 
             {schema.entities.length > 0 && (

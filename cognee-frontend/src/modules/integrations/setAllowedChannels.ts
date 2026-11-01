@@ -6,7 +6,7 @@ export interface SetAllowedChannelsResult {
 }
 
 const UNAVAILABLE =
-  "Choosing which channels to ingest needs a workspace connected through Context Mesh Cloud.";
+  "Choosing which channels to ingest needs a workspace connected through Cognee Cloud.";
 
 /** Open-source stub — see getChannels.ts. */
 export default async function setAllowedChannels(

@@ -218,7 +218,7 @@ export default function DatasetsPage() {
             </div>
             <span style={{ fontSize: 16, fontWeight: 700, color: "#EDECEA" }}>No brains yet</span>
             <p style={{ fontSize: 14, color: "rgba(237,236,234,0.35)", margin: 0, maxWidth: 340, textAlign: "center" }}>
-              A brain turns the documents you upload into a searchable knowledge graph — Context Mesh extracts entities and relationships so you can query them later. Create your first one to get started.
+              A brain turns the documents you upload into a searchable knowledge graph — Cognee extracts entities and relationships so you can query them later. Create your first one to get started.
             </p>
             <button onClick={() => { trackEvent({ pageName: "Brains", eventName: "dataset_create_modal_opened" }); setShowCreate(true); }}
               className="hover:bg-[#5A0ED6] cursor-pointer"

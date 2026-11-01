@@ -33,8 +33,12 @@ MCP_APP="${MCP_APP:-${PREFIX}-mcp}"
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo latest)}"
 # Tag the UI image with the frontend tree's content hash, so local (uncommitted)
 # frontend changes produce a new tag and get rebuilt.
-UI_TAG="${UI_TAG:-$(git ls-files -cmo --exclude-standard cognee-frontend | sort -u |
-  xargs shasum 2>/dev/null | shasum | cut -c1-12)}"
+# The UI is rebranded at build time (deployment/branding/rebrand.py), so the
+# source keeps upstream's wording and rebases cleanly. BRAND= (empty) builds the
+# unbranded Cognee UI.
+BRAND="${BRAND-context-mesh}"
+UI_TAG="${UI_TAG:-$({ git ls-files -cmo --exclude-standard cognee-frontend deployment/branding |
+  sort -u | xargs shasum 2>/dev/null; echo "brand=$BRAND"; } | shasum | cut -c1-12)}"
 
 log() { printf '\n==> %s\n' "$*"; }
 
@@ -84,17 +88,26 @@ if [ -z "${UI_IMAGE:-}" ]; then
   if az acr repository show -n "$ACR" --image "$UI_REPO:$UI_TAG" -o none 2>/dev/null; then
     log "Image $UI_REPO:$UI_TAG already in $ACR, skipping build"
   else
-    log "Building $UI_REPO:$UI_TAG in ACR (linux/amd64)"
+    log "Building $UI_REPO:$UI_TAG in ACR (linux/amd64, brand: ${BRAND:-none})"
+    # Build from a copy of the frontend (the files git would commit), so the
+    # rebrand never touches the checkout.
+    UI_BUILD_ROOT=$(mktemp -d)
+    trap 'rm -rf "$UI_BUILD_ROOT" "${ACR_DOCKERFILE:-}"' EXIT
+    git ls-files -cmo --exclude-standard cognee-frontend | while IFS= read -r f; do
+      if [ -f "$f" ]; then mkdir -p "$UI_BUILD_ROOT/$(dirname "$f")"; cp -p "$f" "$UI_BUILD_ROOT/$f"; fi
+    done
+    UI_CONTEXT="$UI_BUILD_ROOT/cognee-frontend"
+    if [ -n "$BRAND" ]; then
+      python3 deployment/branding/rebrand.py "$UI_CONTEXT" "$BRAND"
+    fi
     # The legacy ACR builder rejects BuildKit-only syntax: drop the syntax
     # directive and turn COPY --chmod into a COPY plus chmod.
-    UI_DOCKERFILE="cognee-frontend/.Dockerfile.acr"
-    trap 'rm -f "$UI_DOCKERFILE" "${ACR_DOCKERFILE:-}"' EXIT
+    UI_DOCKERFILE="$UI_CONTEXT/.Dockerfile.acr"
     sed -E -e '/^# syntax=/d' \
       -e 's#^COPY --chmod=755 (docker-entrypoint\.sh) (/usr/local/bin/docker-entrypoint\.sh)#COPY \1 \2\nRUN chmod 755 \2#' \
       cognee-frontend/Dockerfile >"$UI_DOCKERFILE"
     az acr build -r "$ACR" -t "$UI_REPO:$UI_TAG" -t "$UI_REPO:latest" --target runner \
-      --platform linux/amd64 --timeout 3600 -f "$UI_DOCKERFILE" cognee-frontend --only-show-errors
-    rm -f "$UI_DOCKERFILE"
+      --platform linux/amd64 --timeout 3600 -f "$UI_DOCKERFILE" "$UI_CONTEXT" --only-show-errors
   fi
 fi
 

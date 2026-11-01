@@ -78,7 +78,7 @@ export function LocalProvider({ children }: { children: React.ReactNode }) {
 
         // Network error — backend probably not running
         if (err instanceof TypeError) {
-          setError("Cannot connect to local Context Mesh backend at " + localApiUrl + ". Is it running?");
+          setError("Cannot connect to local Cognee backend at " + localApiUrl + ". Is it running?");
         } else {
           const message = err instanceof Error ? err.message : "Failed to connect to local backend";
           setError(message);

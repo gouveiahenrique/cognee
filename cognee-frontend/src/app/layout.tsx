@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Context Mesh",
+  title: "Cognee",
   description: "Build AI memory with knowledge graphs.",
 };
 

@@ -62,7 +62,7 @@ export function Step1({ onNext, files, setFiles }: {
             <div style={{ color: "#EDECEA", fontSize: 13, lineHeight: "16px" }}>Step 1 of 3</div>
           </div>
           <div style={{ color: "#EDECEA", fontSize: 28, fontWeight: 300, lineHeight: "34px", paddingTop: 8, letterSpacing: "-0.02em", fontFamily: '"TWKLausanne", sans-serif' }}>Connect your data</div>
-          <div style={{ color: "rgba(237,236,234,0.65)", fontSize: 15, lineHeight: "22px", textAlign: "center", maxWidth: 440 }}>Choose how to get your data into Context Mesh. You can always add or change sources later.</div>
+          <div style={{ color: "rgba(237,236,234,0.65)", fontSize: 15, lineHeight: "22px", textAlign: "center", maxWidth: 440 }}>Choose how to get your data into Cognee. You can always add or change sources later.</div>
         </div>
 
         {/* Card: Add new data — solid #2a2a2e to match the rest of onboarding */}

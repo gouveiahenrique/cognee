@@ -14,7 +14,7 @@ export interface ChannelsResult {
 }
 
 const UNAVAILABLE =
-  "Channel lists come from a connected workspace in Context Mesh Cloud, which a self-hosted install does not have.";
+  "Channel lists come from a connected workspace in Cognee Cloud, which a self-hosted install does not have.";
 
 /**
  * Open-source stub — the channel list is read from the provider through the
