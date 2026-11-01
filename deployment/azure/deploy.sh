@@ -35,6 +35,9 @@ PG_VERSION="${PG_VERSION:-16}"
 PG_DB="cognee_db"
 PG_ADMIN="cogneeadmin"
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo latest)}"
+# Optional cognee extras baked into the image. "tracing" carries the
+# OpenTelemetry exporter: without it OTEL_* settings export nothing.
+COGNEE_EXTRAS="${COGNEE_EXTRAS-tracing}"
 
 log() { printf '\n==> %s\n' "$*"; }
 
@@ -110,6 +113,7 @@ else
     trap 'rm -f "$ACR_DOCKERFILE"' EXIT
     sed -E 's#--mount=type=cache,target=[^ ]+[[:space:]]*##' Dockerfile >"$ACR_DOCKERFILE"
     az acr build -r "$ACR" -t "cognee:$IMAGE_TAG" -t cognee:latest \
+      --build-arg "COGNEE_EXTRAS=$COGNEE_EXTRAS" \
       --platform linux/amd64 --timeout 7200 -f "$ACR_DOCKERFILE" . --only-show-errors
     rm -f "$ACR_DOCKERFILE"
   fi
@@ -219,11 +223,27 @@ for k in LLM_PROVIDER LLM_MODEL LLM_ENDPOINT LLM_API_VERSION EMBEDDING_PROVIDER 
   v=$(env_get "$k")
   if [ -n "$v" ]; then ENVS+=("$k=$v"); fi
 done
+# OpenTelemetry, copied from the .env when present. Write the endpoint as the
+# full traces URL with an explicit port (https://host:443/.../v1/traces): cognee
+# uses it verbatim and picks the HTTP exporter only for :443/ or :4318 URLs.
+for k in COGNEE_TRACING_ENABLED OTEL_SERVICE_NAME OTEL_RESOURCE_ATTRIBUTES \
+  OTEL_EXPORTER_OTLP_ENDPOINT OTEL_EXPORTER_OTLP_METRICS_ENDPOINT \
+  OTEL_EXPORTER_OTLP_LOGS_ENDPOINT; do
+  v=$(env_get "$k")
+  if [ -n "$v" ]; then ENVS+=("$k=$v"); fi
+done
+# The exporter headers usually carry an auth token, so they become a secret.
+OTEL_HEADERS_VAL=$(env_get OTEL_EXPORTER_OTLP_HEADERS)
+if [ -n "$OTEL_HEADERS_VAL" ]; then
+  SECRETS+=("otel-exporter-otlp-headers=$OTEL_HEADERS_VAL")
+  ENVS+=("OTEL_EXPORTER_OTLP_HEADERS=secretref:otel-exporter-otlp-headers")
+fi
 
 # GitHub App / Linear OAuth app, each only when its client id is in the .env.
 # Secret values become Container Apps secrets; the callback and frontend URLs
-# default to this deployment's own API and UI apps (deploy-ui-mcp.sh names the
-# UI "${PREFIX}-ui"), so only the app registration values need to be supplied.
+# default to this deployment's own API and UI apps (the UI is UI_APP, or
+# "${PREFIX}-ui" as deploy-ui-mcp.sh names it), so only the app registration
+# values need to be supplied.
 DOMAIN=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query properties.defaultDomain -o tsv)
 add_integration() {
   local provider=$1 prefix=$2 secret_keys=$3 plain_keys=$4 k v name
@@ -244,7 +264,7 @@ add_integration() {
   v=$(env_get "${prefix}_REDIRECT_URI")
   ENVS+=("${prefix}_REDIRECT_URI=${v:-https://${APP}.${DOMAIN}/api/v1/integrations/${provider}/callback}")
   v=$(env_get "${prefix}_FRONTEND_BASE_URL")
-  ENVS+=("${prefix}_FRONTEND_BASE_URL=${v:-https://${PREFIX}-ui.${DOMAIN}}")
+  ENVS+=("${prefix}_FRONTEND_BASE_URL=${v:-https://${UI_APP:-${PREFIX}-ui}.${DOMAIN}}")
 }
 add_integration github GITHUB "CLIENT_SECRET APP_PRIVATE_KEY WEBHOOK_SECRET" "CLIENT_ID APP_ID APP_SLUG"
 add_integration linear LINEAR "CLIENT_SECRET WEBHOOK_SECRET" "CLIENT_ID"
