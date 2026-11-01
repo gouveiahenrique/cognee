@@ -83,7 +83,7 @@ log "Deploying API and shared infrastructure"
 bash "$API_SCRIPT" "$ENV_FILE"
 
 ACA_ENV="${PREFIX}-env"
-API_APP="${PREFIX}-api"
+API_APP="${API_APP:-${PREFIX}-api}"
 DOMAIN=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query properties.defaultDomain -o tsv)
 [ -n "$DOMAIN" ] || fail "could not determine Container Apps domain for $ACA_ENV"
 API_URL="https://${API_APP}.${DOMAIN}"
@@ -104,5 +104,5 @@ log "API is healthy; deploying UI and MCP"
 bash "$UI_MCP_SCRIPT"
 
 log "All components deployed"
-printf 'API: %s\nUI:  https://%s-ui.%s\nMCP: https://%s-mcp.%s/mcp\n' \
-  "$API_URL" "$PREFIX" "$DOMAIN" "$PREFIX" "$DOMAIN"
+printf 'API: %s\nUI:  https://%s.%s\nMCP: https://%s.%s/mcp\n' \
+  "$API_URL" "${UI_APP:-${PREFIX}-ui}" "$DOMAIN" "${MCP_APP:-${PREFIX}-mcp}" "$DOMAIN"
